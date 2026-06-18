@@ -63,7 +63,7 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Menu di Navigazione a Tab */
+    /* Barra Navigazione Interna */
     .tabs-nav {
       display: flex;
       gap: 1rem;
@@ -95,7 +95,6 @@
       border-bottom: 2px solid var(--accent);
     }
 
-    /* Gestione visibilità sezioni */
     .tab-content {
       display: none;
     }
@@ -104,7 +103,7 @@
       display: block;
     }
 
-    /* Layout Generatore */
+    /* Griglia Filtri */
     .grid-form {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -195,10 +194,10 @@
       background: #1e3d29;
     }
 
-    /* Layout Form Incorporato */
+    /* Wrapper Iframe Google Form */
     .form-wrapper {
       width: 100%;
-      height: 900px;
+      height: 950px;
       border: 1px solid var(--border);
       background: #ffffff;
     }
@@ -214,17 +213,17 @@
 </head>
 <body>
 
-  <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Istituzionale Stradivari" />
+  <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Stradivari" />
 
   <div class="container">
     <div class="official-header">
-      <div class="subtitle">Stradilab — Sistema Integrato Piani di Studio</div>
-      <h1>Hub Digitale Unità di Apprendimento</h1>
+      <div class="subtitle">Stradilab — Strumenti Didattici Digitali</div>
+      <h1>Hub Unificato Unità di Apprendimento</h1>
     </div>
 
     <div class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab('generatore')">📋 Genera Piano PDF</button>
-      <button class="tab-btn" onclick="switchTab('inserimento')">➕ Inserisci Nuova UDA</button>
+      <button id="btn-generatore" class="tab-btn active" onclick="switchTab('generatore')">📋 Genera Piano PDF</button>
+      <button id="btn-inserimento" class="tab-btn" onclick="switchTab('inserimento')">➕ Inserisci Nuova UDA (Form)</button>
     </div>
 
     <div id="tab-generatore" class="tab-content active">
@@ -292,7 +291,7 @@
         <iframe 
           src="https://docs.google.com/forms/d/e/1FAIpQLSdy7IdZ4TEHGboQRsGnAZtB7PjRnuW8S740kVwp-Cq-0fcsfA/viewform?embedded=true" 
           loading="lazy">
-          Caricamento del modulo di inserimento...
+          Caricamento del modulo di inserimento in corso...
         </iframe>
       </div>
     </div>
@@ -301,24 +300,23 @@
   <script>
     let databaseGlobaleUda = [];
     
-    // Connessione ultra-rapida tramite l'endpoint di query di Google Sheets (Legge solo i dati strutturati eliminando i ritardi)
+    // Configurazione endpoint e bypass completo dei delay del cloud Google
     const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
     const GID = "1891931441";
-    const DIRECT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
 
     window.onload = function() {
       caricaDatiIstantanei();
     };
 
-    // Navigazione fluida tra i Tab
+    // Navigazione nativa istantanea tra i tab
     function switchTab(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
       
-      event.target.classList.add('active');
+      document.getElementById(`btn-${tabName}`).classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
       
-      // Se si torna sul generatore, aggiorna i dati in background in modo istantaneo
+      // Quando il docente torna sul generatore, forziamo una ri-sincronizzazione al millisecondo
       if(tabName === 'generatore') {
         caricaDatiIstantanei();
       }
@@ -326,20 +324,24 @@
 
     async function caricaDatiIstantanei() {
       const statusMsg = document.getElementById('statusMsg');
+      // Aggiungiamo un parametro casuale nell'URL per bypassare la cache del browser e forzare l'allineamento con il form
+      const cacheBuster = "&nocache=" + new Date().getTime();
+      const URL_SINCRO = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}${cacheBuster}`;
+
       try {
-        const response = await fetch(DIRECT_URL);
+        const response = await fetch(URL_SINCRO);
         if (!response.ok) throw new Error();
         const csvText = await response.text();
         
         databaseGlobaleUda = parsingVeloceCsv(csvText);
         statusMsg.style.background = "#eef5ee";
         statusMsg.style.color = "var(--accent)";
-        statusMsg.innerText = `✅ Database UDA sincronizzato all'istante! Rilevate ${databaseGlobaleUda.length} righe attive.`;
+        statusMsg.innerText = `✅ Database UDA sincronizzato all'istante! Rilevate ${databaseGlobaleUda.length} righe totali nel Master.`;
         
         filtraUdaSito();
       } catch (e) {
         statusMsg.style.background = "#faf7f2";
-        statusMsg.innerText = "💡 Lettura in corso o modalità asincrona attiva.";
+        statusMsg.innerText = "💡 Lettura in corso o aggiornamento asincrono attivo.";
       }
     }
 
@@ -365,7 +367,6 @@
         
         const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
         
-        // Mappatura esatta basata sul file tracciato UDA_MASTER
         if (pulito.length >= 15) {
           risultato.push({
             id: pulito[0] || "U_ID_" + i,
@@ -400,7 +401,7 @@
       
       container.innerHTML = '';
       if(filtrati.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna riga trovata nel foglio per questa selezione.</p>';
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessun tracciato presente sul foglio per i filtri selezionati. Se hai appena aggiunto un\'UDA dal Form, verifica che Anno Corso e Indirizzo coincidano.</p>';
         return;
       }
 

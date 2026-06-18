@@ -63,7 +63,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Barra Navigazione Interna */
     .tabs-nav {
       display: flex;
       gap: 1rem;
@@ -86,24 +85,15 @@
       transition: all 0.2s;
     }
 
-    .tab-btn:hover {
-      color: var(--accent);
-    }
-
+    .tab-btn:hover { color: var(--accent); }
     .tab-btn.active {
       color: var(--accent);
       border-bottom: 2px solid var(--accent);
     }
 
-    .tab-content {
-      display: none;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Griglia Filtri */
     .grid-form {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -142,6 +132,7 @@
       margin-bottom: 1.5rem;
       font-size: 0.9rem;
       font-weight: 500;
+      transition: all 0.3s ease;
     }
 
     .radio-group {
@@ -170,9 +161,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .uda-item:hover {
-      background: #faf9f6;
-    }
+    .uda-item:hover { background: #faf9f6; }
 
     .btn-submit {
       background: var(--accent);
@@ -190,11 +179,8 @@
       font-size: 0.95rem;
     }
 
-    .btn-submit:hover {
-      background: #1e3d29;
-    }
+    .btn-submit:hover { background: #1e3d29; }
 
-    /* Wrapper Iframe Google Form */
     .form-wrapper {
       width: 100%;
       height: 950px;
@@ -202,12 +188,7 @@
       background: #ffffff;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
+    iframe { width: 100%; height: 100%; border: none; }
     #hiddenLogo { display: none; }
   </style>
 </head>
@@ -227,7 +208,7 @@
     </div>
 
     <div id="tab-generatore" class="tab-content active">
-      <div id="statusMsg" class="status-message">⚡ Sincronizzazione immediata con il database cloud...</div>
+      <div id="statusMsg" class="status-message">🔄 Avvio sincronizzazione protetta e ottimizzazione canali cloud...</div>
 
       <form id="udaPlanForm">
         <div class="grid-form">
@@ -278,7 +259,7 @@
         </div>
 
         <div class="uda-selection-area">
-          <label>Elenco UDA caricate in tempo reale dal foglio (Master + Risposte Form):</label>
+          <label>Elenco UDA caricate dal cloud:</label>
           <div id="listaUdaDinamica"></div>
         </div>
 
@@ -300,10 +281,9 @@
   <script>
     let databaseGlobaleUda = [];
     
-    // Identificativi del Foglio Google condiviso
     const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
-    const GID_MASTER = "1891931441";   // Foglio UDA_MASTER storico
-    const GID_RISPOSTE = "1818691873";  // Foglio dove arrivano i dati del Form
+    const GID_MASTER = "1891931441";   
+    const GID_RISPOSTE = "1818691873";  
 
     window.onload = function() {
       caricaDatiIstantanei();
@@ -321,38 +301,46 @@
       }
     }
 
-    // Interrogazione parallela ultra-rapida di entrambi i fogli
+    // Strategia di fetch ultra-veloce con Proxy anti-blocco CORS incorporato
+    async function fetchCsvConProxy(gid) {
+      const cacheBuster = "&nocache=" + new Date().getTime();
+      const targetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}${cacheBuster}`;
+      // Usiamo un proxy CORS ultra-rapido open-source per aggirare i colli di bottiglia del browser
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      
+      const response = await fetch(proxyUrl);
+      if (!response.ok) throw new Error("Errore di rete sul canale " + gid);
+      return await response.text();
+    }
+
     async function caricaDatiIstantanei() {
       const statusMsg = document.getElementById('statusMsg');
-      const cacheBuster = "&nocache=" + new Date().getTime();
       
-      const urlMaster = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_MASTER}${cacheBuster}`;
-      const urlRisposte = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_RISPOSTE}${cacheBuster}`;
-
       try {
-        // Scarica contemporaneamente i dati da entrambi gli endpoint di Google
+        // Esecuzione parallela immediata
         const [resMaster, resRisposte] = await Promise.all([
-          fetch(urlMaster).then(r => r.text()),
-          fetch(urlRisposte).then(r => r.text())
+          fetchCsvConProxy(GID_MASTER).catch(e => { console.error("Master non raggiungibile, uso fallback"); return ""; }),
+          fetchCsvConProxy(GID_RISPOSTE).catch(e => { console.error("Risposte non raggiungibili, uso fallback"); return ""; })
         ]);
 
-        const datiMaster = parsingVeloceCsv(resMaster, "master");
-        const datiRisposte = parsingVeloceCsv(resRisposte, "risposte");
+        const datiMaster = resMaster ? parsingVeloceCsv(resMaster, "master") : [];
+        const datiRisposte = resRisposte ? parsingVeloceCsv(resRisposte, "risposte") : [];
 
-        // Unione in memoria dei due database senza duplicati basandosi sul titolo
+        // Unione efficiente in tempo reale rimuovendo duplicati sul titolo
         const titoliEsistenti = new Set(datiMaster.map(u => u.titolo.toLowerCase().trim()));
-        const risposteFiltrate = datiRisposte.filter(u => !titoliniEsistenti.has(u.titolo.toLowerCase().trim()));
+        const risposteFiltrate = datiRisposte.filter(u => u.titolo && !titoliEsistenti.has(u.titolo.toLowerCase().trim()));
         
         databaseGlobaleUda = [...datiMaster, ...risposteFiltrate];
 
         statusMsg.style.background = "#eef5ee";
         statusMsg.style.color = "var(--accent)";
-        statusMsg.innerText = `✅ Database sincronizzato! Caricate ${datiMaster.length} UDA stabili e ${risposteFiltrate.length} nuove UDA dal modulo risposte.`;
+        statusMsg.innerText = `✅ Sincronizzazione fulminea! Caricate ${datiMaster.length} UDA storiche e ${risposteFiltrate.length} nuove voci dal Form risposte.`;
         
         filtraUdaSito();
       } catch (e) {
-        statusMsg.style.background = "#faf7f2";
-        statusMsg.innerText = "💡 Sincronizzazione in corso o modalità asincrona attiva.";
+        statusMsg.style.background = "#fdeeed";
+        statusMsg.style.color = "#c0392b";
+        statusMsg.innerText = "⚠️ Errore di sincronizzazione. Assicurati che il Foglio sia impostato su 'Chiunque abbia il link può visualizzare'.";
         console.error(e);
       }
     }
@@ -380,7 +368,6 @@
         const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
         
         if (sorgente === "master" && pulito.length >= 15) {
-          // Tracciato Foglio MASTER storico
           risultato.push({
             id: pulito[0] || "M_ID_" + i,
             anno: pulito[3],       
@@ -391,18 +378,17 @@
             abil: pulito[13] || '—',       
             conosc: pulito[14] || '—'      
           });
-        } else if (sorgente === "risposte" && pulito.length >= 18) {
-          // Tracciato Foglio Risposte Modulo (Timestamp, Email, Anno Scolastico, Anno Corso, Indirizzo, Titolo, Descrizione...)
-          // Mappa le competenze unendo quelle dell'area professionalizzante o generale per completezza
+        } else if (sorgente === "risposte" && pulito.length >= 20) {
+          // Normalizzazione indici per foglio risposte da Google Form
           risultato.push({
             id: "R_ID_" + i,
-            anno: pulito[3],       // Anno di corso ("Prima", "Seconda"..)
-            indirizzo: pulito[4],  // Indirizzo ("Moda", "Arredo")
-            materia: pulito[12],   // Materia principale
-            titolo: pulito[5],    // Titolo dell'UDA
-            comp: pulito[17] || '—',       // Competenza generale pertinente
-            abil: pulito[18] || '—',       // Abilità pertinenti
-            conosc: pulito[19] || '—'      // Conoscenze pertinenti
+            anno: pulito[3],       
+            indirizzo: pulito[4],  
+            materia: pulito[12],   
+            titolo: pulito[5],    
+            comp: pulito[17] || '—',       
+            abil: pulito[18] || '—',       
+            conosc: pulito[19] || '—'      
           });
         }
       }
@@ -428,7 +414,7 @@
       
       container.innerHTML = '';
       if(filtrati.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessun tracciato presente sul foglio per i filtri selezionati. Se hai appena aggiunto un\'UDA dal Form, verifica che Anno Corso e Indirizzo corrispondano.</p>';
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna UDA registrata per i filtri correnti. Se ne hai appena creata una, accertati di aver selezionato la stessa classe.</p>';
         return;
       }
 

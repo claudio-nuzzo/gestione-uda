@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   
-  <!-- Librerie per la generazione istantanea del PDF in locale -->
+  <!-- Librerie per la generazione del PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
@@ -94,12 +94,11 @@
 
     .status-message {
       padding: 1rem;
-      background: #eef5ee;
-      border: 1px solid #cce3cc;
-      color: var(--accent);
+      background: #faf7f2;
+      border: 1px solid var(--border);
+      color: var(--ink-soft);
       margin-bottom: 1.5rem;
       font-size: 0.9rem;
-      display: none;
     }
 
     .radio-group {
@@ -165,13 +164,13 @@
       <h1>Generatore Piano Annuale delle UDA</h1>
     </div>
 
-    <div id="statusMsg" class="status-message">🔄 Caricamento del database centralizzato delle UDA in corso...</div>
+    <div id="statusMsg" class="status-message">🔄 Sincronizzazione in corso con il foglio Google Master...</div>
 
     <form id="udaPlanForm">
       <div class="grid-form">
         <div>
           <label for="annoCorso">Classe (Anno di corso)</label>
-          <select id="annoCorso" required onchange="filtraUdaSito()">
+          <select id="annoCorso" onchange="filtraUdaSito()">
             <option value="Prima">Classe Prima (1)</option>
             <option value="Seconda">Classe Seconda (2)</option>
             <option value="Terza">Classe Terza (3)</option>
@@ -187,7 +186,7 @@
 
         <div>
           <label for="indirizzo">Indirizzo di Studio</label>
-          <select id="indirizzo" required onchange="filtraUdaSito()">
+          <select id="indirizzo" onchange="filtraUdaSito()">
             <option value="Moda">Moda (Made in Italy)</option>
             <option value="Arredo">Arredo (Legno/Design)</option>
           </select>
@@ -216,7 +215,7 @@
       </div>
 
       <div id="udaSelectionArea" class="uda-selection-area">
-        <label>Elenco UDA disponibili per la classe e l'indirizzo selezionati:</label>
+        <label>Elenco UDA caricate dal foglio per la selezione corrente:</label>
         <div id="listaUdaDinamica"></div>
       </div>
 
@@ -225,38 +224,68 @@
   </div>
 
   <script>
-    // Memoria locale dell'applicazione che conterrà TUTTE le UDA caricate dal Cloud/Database
     let databaseGlobaleUda = [];
+    
+    // URL di esportazione CSV pubblica del tuo foglio specifico (Tab ID: 1891931441)
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA/export?format=csv&gid=1891931441";
 
-    // Al caricamento, interroghiamo l'endpoint di Cloudflare o Google Sheets
-    window.onload = async function() {
-      const statusMsg = document.getElementById('statusMsg');
-      statusMsg.style.display = 'block';
-      
-      try {
-        // Quando avrai attivo il worker, inseriremo qui l'URL reale (es: /api/get-uda)
-        // Per ora simula il recupero dei dati completi senza bloccare lo sviluppo
-        const response = await fetch('/api/get-uda-database').catch(() => null);
-        if (response && response.ok) {
-          databaseGlobaleUda = await response.json();
-          statusMsg.innerText = "✅ Database UDA sincronizzato con successo dal Cloud!";
-        } else {
-          // Fallback di sviluppo temporaneo per non mostrare lo schermo vuoto
-          databaseGlobaleUda = recuperaDatiEsempioIniziali();
-          statusMsg.innerHTML = "⚠️ Esecuzione in modalità locale. Pronto a ricevere la Function Cloudflare.";
-        }
-      } catch (e) {
-        databaseGlobaleUda = recuperaDatiEsempioIniziali();
-        statusMsg.innerText = "⚠️ Errore di rete. Caricate UDA locali predefinite.";
-      }
-      
-      filtraUdaSito();
+    window.onload = function() {
+      caricaDatiDalFoglio();
     };
+
+    async function caricaDatiDalFoglio() {
+      const statusMsg = document.getElementById('statusMsg');
+      try {
+        const response = await fetch(SHEET_CSV_URL);
+        if (!response.ok) throw new Error("Risposta ko dal server di Google");
+        const csvText = await response.text();
+        
+        databaseGlobaleUda = parsingCsvGoogle(csvText);
+        statusMsg.style.background = "#eef5ee";
+        statusMsg.style.color = "var(--accent)";
+        statusMsg.innerText = `✅ Connessione riuscita! Caricate ${databaseGlobaleUda.length} righe totali dal foglio Google master.`;
+        
+        filtraUdaSito();
+      } catch (e) {
+        statusMsg.style.background = "#fdeeed";
+        statusMsg.style.color = "#c0392b";
+        statusMsg.innerHTML = `❌ Errore di collegamento al foglio. Verifica che il foglio sia impostato su <strong>"Chiunque abbia il link può visualizzare"</strong> nelle opzioni di condivisione di Google Drive.`;
+      }
+    }
+
+    // Trasforma il CSV del foglio in oggetti puliti utilizzabili dal motore PDF
+    function parsingCsvGoogle(text) {
+      const righe = text.split(/\r?\n/);
+      const risultato = [];
+      
+      // Partiamo da 1 per saltare l'intestazione delle colonne del foglio
+      for (let i = 1; i < righe.length; i++) {
+        if (!righe[i].trim()) continue;
+        
+        // Espressione regolare per gestire correttamente i testi con virgole e virgolette
+        const celle = righe[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || righe[i].split(',');
+        const pulito = celle.map(c => c.replace(/^"|Status$/g, '').trim());
+        
+        if (pulito.length >= 6) {
+          risultato.push({
+            id: "UDA_" + i,
+            anno: pulito[0],       // Colonna A: Classe (Prima, Seconda, ecc.)
+            indirizzo: pulito[1],  // Colonna B: Indirizzo (Moda, Arredo)
+            materia: pulito[2],    // Colonna C: Materia / Insegnamento
+            titolo: pulito[3],     // Colonna D: Titolo UDA
+            comp: pulito[4],       // Colonna E: Competenze
+            abil: pulito[5],       // Colonna F: Abilità
+            conosc: pulito[6] || ''// Colonna G: Conoscenze
+          });
+        }
+      }
+      return risultato;
+    }
 
     function toggleSelezioneVisiva(mostraOpzioni) {
       const checkboxes = document.querySelectorAll('.uda-checkbox');
       checkboxes.forEach(cb => {
-        if(!mostraOpzioni) cb.checked = true; // Se l'utente vuole tutto completo, forza la spunta su tutte
+        if(!mostraOpzioni) cb.checked = true;
       });
     }
 
@@ -265,11 +294,14 @@
       const indirizzo = document.getElementById('indirizzo').value;
       const container = document.getElementById('listaUdaDinamica');
       
-      const udaFiltrate = databaseGlobaleUda.filter(u => u.anno === anno && u.indirizzo === indirizzo);
+      const udaFiltrate = databaseGlobaleUda.filter(u => 
+        u.anno.toLowerCase().includes(anno.toLowerCase()) && 
+        u.indirizzo.toLowerCase().includes(indirizzo.toLowerCase())
+      );
       
       container.innerHTML = '';
       if(udaFiltrate.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding: 1rem 0;">Nessun dato registrato sul database per questa combinazione. Configura il foglio Google master per questa classe.</p>';
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding: 1rem 0;">Nessuna riga corrispondente trovata nel foglio per i filtri selezionati.</p>';
         return;
       }
 
@@ -283,7 +315,7 @@
               <strong style="color:var(--accent); text-transform: uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
               <span style="font-weight:500;">${u.titolo}</span>
               <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:3px;">
-                C: ${u.comp || '—'} | A: ${u.abil || '—'} | C: ${u.conosc || '—'}
+                Competenze: ${u.comp} | Abilità: ${u.abil} | Conoscenze: ${u.conosc}
               </div>
             </div>
           </label>
@@ -295,8 +327,6 @@
     document.getElementById('udaPlanForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const { jsPDF } = window.jspdf;
-      
-      // CONFIGURAZIONE PAESAGGIO (LANDSCAPE) PER OUTPUT COMPLETISSIMO
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
       const annoCorso = document.getElementById('annoCorso').value;
@@ -304,17 +334,15 @@
       const indirizzo = document.getElementById('indirizzo').value;
       const annoScolastico = document.getElementById('annoScolastico').value;
 
-      // Recupera solo le UDA che hanno il check attivo nel pannello
       const checkboxes = document.querySelectorAll('.uda-checkbox:checked');
       const idsSelezionati = Array.from(checkboxes).map(cb => cb.value);
       const udaDaStampare = databaseGlobaleUda.filter(u => idsSelezionati.includes(u.id));
 
       if (udaDaStampare.length === 0) {
-        alert("Seleziona almeno un'UDA dall'elenco visivo prima di procedere alla stampa.");
+        alert("Seleziona almeno un'UDA dall'elenco prima di generare.");
         return;
       }
 
-      // 1. Rendering Intestazione Grafica Istituzionale
       const imgLogo = document.getElementById('scuolaLogo');
       try {
         doc.addImage(imgLogo, 'JPEG', 15, 12, 195, 23);
@@ -324,12 +352,10 @@
         doc.text("I.I.S. ANTONIO STRADIVARI — CREMONA", 15, 18);
       }
 
-      // Riga ornamentale verde istituzionale
       doc.setDrawColor(45, 90, 61);
       doc.setLineWidth(0.8);
       doc.line(15, 38, 282, 38);
 
-      // 2. Metadati del Documento
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(10);
       doc.setTextColor(90, 85, 80);
@@ -341,17 +367,15 @@
       doc.setTextColor(26, 24, 20);
       doc.text(`PIANO FORMATIVO INTEGRALE DELLE UNITA' DI APPRENDIMENTO (UDA) — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 59);
 
-      // 3. Elaborazione Righe Tabella (Senza Ore, con competenze separate)
       const righeTabella = udaDaStampare.map((u, index) => [
         `${index + 1}`,
         u.materia,
         u.titolo,
-        u.comp || '—',
-        u.abil || '—',
-        u.conosc || '—'
+        u.comp,
+        u.abil,
+        u.conosc
       ]);
 
-      // Generazione griglia AutoTable con ottimizzazione spazi
       doc.autoTable({
         startY: 65,
         head: [['N°', 'Materia / Insegnamento', 'Titolo Unità di Apprendimento (UDA)', 'Competenze', 'Abilità', 'Conoscenze']],
@@ -359,39 +383,26 @@
         headStyles: { fillColor: [45, 90, 61], fontSize: 9.5, fontStyle: 'bold' },
         bodyStyles: { fontSize: 8.5, textColor: [26, 24, 20], valign: 'top' },
         columnStyles: {
-          0: { cellWidth: 10, halign: 'center' },
+          0: { cellWidth: 12, halign: 'center' },
           1: { cellWidth: 55 },
           2: { cellWidth: 80 },
           3: { cellWidth: 35 },
           4: { cellWidth: 45 },
-          5: { cellWidth: 42 }
+          5: { cellWidth: 40 }
         },
         margin: { left: 15, right: 15 },
         styles: { overflow: 'paragraph' }
       });
 
-      // 4. Sezione Firme AUTORIZZATE: Solo ed esclusivamente il Coordinatore
       const finalY = doc.lastAutoTable.finalY + 20;
       doc.setFont("Helvetica", "italic");
       doc.setFontSize(10);
       doc.setTextColor(26, 24, 20);
-      doc.text("Il Coordinatore di Classe", 215, finalY);
+      doc.text("Il Coordinatore di Classe", 215, finalY);[cite: 4]
       doc.line(215, finalY + 12, 275, finalY + 12);
 
-      // Download immediato del file generato sul client
       doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
     });
-
-    // Sementi dati di esempio per la simulazione iniziale locale (Prima Moda)
-    function recuperaDatiEsempioIniziali() {
-      return [
-        { id: "M1", anno: "Prima", indirizzo: "Moda", materia: "LINGUA E LETTERATURA ITALIANA", titolo: "UDA 1 – Analisi grammaticale", comp: "2A", abil: "A.ITA.2.5", conosc: "C.ITA.3" },
-        { id: "M2", anno: "Prima", indirizzo: "Moda", materia: "LINGUA E LETTERATURA ITALIANA", titolo: "UDA 2 – Narrativa (racconto e romanzo)", comp: "2A", abil: "A.ITA.2.5", conosc: "C.ITA.3" },
-        { id: "M3", anno: "Prima", indirizzo: "Moda", materia: "LINGUA E LETTERATURA ITALIANA", titolo: "UDA 3 – Il genere epico (Iliade, Odissea, Eneide)", comp: "1, 2", abil: "A.ITA.1.1, A.ITA.1.2", conosc: "C.ITA.1, C.ITA.5" },
-        { id: "M4", anno: "Prima", indirizzo: "Moda", materia: "STORIA E GEOGRAFIA", titolo: "UDA 1 – Storia greca (antiche civiltà, poleis, ellenismo)", comp: "1A, 4A", abil: "A.STO.1.1, A.STO.4.1", conosc: "C.STO.1, C.STO.2" },
-        { id: "M5", anno: "Prima", indirizzo: "Moda", materia: "LINGUA INGLESE", titolo: "UDA 1 – This is me", comp: "5A", abil: "A.ING.5.3, A.ING.5.5", conosc: "C.ING.1, C.ING.2" }
-      ];
-    }
   </script>
 </body>
 </html>

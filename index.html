@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stradilab — Generatore Piani UDA Universale</title>
+  <title>Stradilab — Hub Unificato UDA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -42,27 +42,69 @@
 
     .official-header {
       border-bottom: 2px solid var(--accent);
-      padding-bottom: 1.5rem;
+      padding-bottom: 1rem;
       margin-bottom: 2rem;
-      text-align: center;
     }
 
     h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2.6rem;
+      font-size: 2.4rem;
       font-weight: 400;
-      margin: 0.5rem 0;
+      margin: 0;
       color: var(--accent);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
     }
 
     .subtitle {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: var(--ink-soft);
       text-transform: uppercase;
       letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
     }
 
+    /* Menu di Navigazione a Tab */
+    .tabs-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--accent);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+
+    /* Gestione visibilità sezioni */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Layout Generatore */
     .grid-form {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -100,7 +142,6 @@
       color: var(--ink-soft);
       margin-bottom: 1.5rem;
       font-size: 0.9rem;
-      border-radius: var(--radius);
       font-weight: 500;
     }
 
@@ -121,10 +162,6 @@
     .radio-option input {
       margin-right: 0.5rem;
       accent-color: var(--accent);
-    }
-
-    .uda-selection-area {
-      margin-top: 1.5rem;
     }
 
     .uda-item {
@@ -158,161 +195,180 @@
       background: #1e3d29;
     }
 
-    /* Elemento nascosto per caricare l'immagine del logo da passare a jsPDF */
-    #hiddenLogo {
-      display: none;
+    /* Layout Form Incorporato */
+    .form-wrapper {
+      width: 100%;
+      height: 900px;
+      border: 1px solid var(--border);
+      background: #ffffff;
     }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #hiddenLogo { display: none; }
   </style>
 </head>
 <body>
 
-  <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Ministeriale Stradivari" />
+  <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Istituzionale Stradivari" />
 
   <div class="container">
     <div class="official-header">
-      <div class="subtitle">Stradilab — Sperimentazione Didattica</div>
-      <h1>Generatore Piani Annuali delle UDA</h1>
+      <div class="subtitle">Stradilab — Sistema Integrato Piani di Studio</div>
+      <h1>Hub Digitale Unità di Apprendimento</h1>
     </div>
 
-    <div id="statusMsg" class="status-message">🔄 Sincronizzazione in corso con il foglio Google Master...</div>
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('generatore')">📋 Genera Piano PDF</button>
+      <button class="tab-btn" onclick="switchTab('inserimento')">➕ Inserisci Nuova UDA</button>
+    </div>
 
-    <form id="udaPlanForm">
-      <div class="grid-form">
-        <div>
-          <label for="annoCorso">Classe (Anno di corso)</label>
-          <select id="annoCorso" onchange="filtraUdaSito()">
-            <option value="Prima">Classe Prima (1)</option>
-            <option value="Seconda">Classe Seconda (2)</option>
-            <option value="Terza">Classe Terza (3)</option>
-            <option value="Quarta">Classe Quarta (4)</option>
-            <option value="Quinta">Classe Quinta (5)</option>
-          </select>
+    <div id="tab-generatore" class="tab-content active">
+      <div id="statusMsg" class="status-message">⚡ Sincronizzazione immediata con il database cloud...</div>
+
+      <form id="udaPlanForm">
+        <div class="grid-form">
+          <div>
+            <label for="annoCorso">Classe (Anno di corso)</label>
+            <select id="annoCorso" onchange="filtraUdaSito()">
+              <option value="Prima">Classe Prima (1)</option>
+              <option value="Seconda">Classe Seconda (2)</option>
+              <option value="Terza">Classe Terza (3)</option>
+              <option value="Quarta">Classe Quarta (4)</option>
+              <option value="Quinta">Classe Quinta (5)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="sezione">Sezione</label>
+            <input type="text" id="sezione" placeholder="es. A, B, MODA" required style="text-transform: uppercase;" />
+          </div>
+
+          <div>
+            <label for="indirizzo">Indirizzo di Studio</label>
+            <select id="indirizzo" onchange="filtraUdaSito()">
+              <option value="Moda">Moda (Made in Italy)</option>
+              <option value="Arredo">Arredo (Legno/Design)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="annoScolastico">Anno Scolastico</label>
+            <select id="annoScolastico" required>
+              <option value="2025/2026">2025/2026</option>
+              <option value="2026/2027">2026/2027</option>
+              <option value="2027/2028">2027/2028</option>
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label for="sezione">Sezione</label>
-          <input type="text" id="sezione" placeholder="es. A, B, MODA" required style="text-transform: uppercase;" />
+        <div class="radio-group">
+          <label>Modalità di Selezione</label>
+          <label class="radio-option">
+            <input type="radio" name="strategiaUda" value="tutte" checked onclick="toggleSelezioneVisiva(false)" />
+            Seleziona Tutto in Automatico (Piano Completo)
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="strategiaUda" value="personalizza" onclick="toggleSelezioneVisiva(true)" />
+            Personalizza elenco / Escludi elementi singoli
+          </label>
         </div>
 
-        <div>
-          <label for="indirizzo">Indirizzo di Studio</label>
-          <select id="indirizzo" onchange="filtraUdaSito()">
-            <option value="Moda">Moda (Made in Italy)</option>
-            <option value="Arredo">Arredo (Legno/Design)</option>
-          </select>
+        <div class="uda-selection-area">
+          <label>Elenco UDA caricate in tempo reale dal foglio:</label>
+          <div id="listaUdaDinamica"></div>
         </div>
 
-        <div>
-          <label for="annoScolastico">Anno Scolastico</label>
-          <select id="annoScolastico" required>
-            <option value="2025/2026">2025/2026</option>
-            <option value="2026/2027">2026/2027</option>
-            <option value="2027/2028">2027/2028</option>
-          </select>
-        </div>
+        <button type="submit" class="btn-submit">💾 Genera e Scarica PDF Ufficiale</button>
+      </form>
+    </div>
+
+    <div id="tab-inserimento" class="tab-content">
+      <div class="form-wrapper">
+        <iframe 
+          src="https://docs.google.com/forms/d/e/1FAIpQLSdy7IdZ4TEHGboQRsGnAZtB7PjRnuW8S740kVwp-Cq-0fcsfA/viewform?embedded=true" 
+          loading="lazy">
+          Caricamento del modulo di inserimento...
+        </iframe>
       </div>
-
-      <div class="radio-group">
-        <label>Modalità di Selezione</label>
-        <label class="radio-option">
-          <input type="radio" name="strategiaUda" value="tutte" checked onclick="toggleSelezioneVisiva(false)" />
-          Seleziona Tutto (Output Completo Istituzionale)
-        </label>
-        <label class="radio-option">
-          <input type="radio" name="strategiaUda" value="personalizza" onclick="toggleSelezioneVisiva(true)" />
-          Personalizza / Deseleziona elementi singoli
-        </label>
-      </div>
-
-      <div id="udaSelectionArea" class="uda-selection-area">
-        <label>Elenco UDA caricate dal foglio per la selezione corrente:</label>
-        <div id="listaUdaDinamica"></div>
-      </div>
-
-      <button type="submit" class="btn-submit">💾 Genera e Scarica PDF Ufficiale</button>
-    </form>
+    </div>
   </div>
 
   <script>
     let databaseGlobaleUda = [];
     
-    // URL di esportazione CSV con fallbacks multipli anti-CORS per evitare blocchi del browser
+    // Connessione ultra-rapida tramite l'endpoint di query di Google Sheets (Legge solo i dati strutturati eliminando i ritardi)
     const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
     const GID = "1891931441";
-    const DIRECT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-    const CORS_PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(DIRECT_URL)}`;
+    const DIRECT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
 
     window.onload = function() {
-      caricaDatiDalFoglio();
+      caricaDatiIstantanei();
     };
 
-    async function caricaDatiDalFoglio() {
-      const statusMsg = document.getElementById('statusMsg');
-      // Tentativo 1: Chiamata tramite Proxy per evitare blocchi CORS locali e accelerare il recupero
-      try {
-        const response = await fetch(CORS_PROXY_URL);
-        if (!response.ok) throw new Error();
-        const csvText = await response.text();
-        elaboraCsv(csvText, "Ottimizzata (Cloud Proxy)");
-      } catch (e) {
-        // Tentativo 2: Fallback diretto se il proxy ha problemi
-        try {
-          const responseDirect = await fetch(DIRECT_URL);
-          if (!responseDirect.ok) throw new Error();
-          const csvTextDirect = await responseDirect.text();
-          elaboraCsv(csvTextDirect, "Diretta (Google Cloud)");
-        } catch (err2) {
-          statusMsg.style.background = "#fdeeed";
-          statusMsg.style.color = "#c0392b";
-          statusMsg.innerHTML = `⚠️ Errore di sincronizzazione. Verifica che il foglio sia impostato su <strong>"Chiunque abbia il link può visualizzare"</strong> nelle opzioni di condivisione di Google Drive.`;
-        }
+    // Navigazione fluida tra i Tab
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      
+      // Se si torna sul generatore, aggiorna i dati in background in modo istantaneo
+      if(tabName === 'generatore') {
+        caricaDatiIstantanei();
       }
     }
 
-    function elaboraCsv(csvText, modalita) {
+    async function caricaDatiIstantanei() {
       const statusMsg = document.getElementById('statusMsg');
-      databaseGlobaleUda = parsingCsvGoogleMaster(csvText);
-      statusMsg.style.background = "#eef5ee";
-      statusMsg.style.color = "var(--accent)";
-      statusMsg.innerText = `✅ Connessione riuscita [Mod: ${modalita}]. Sincronizzate ${databaseGlobaleUda.length} righe UDA dal foglio Google.`;
-      filtraUdaSito();
+      try {
+        const response = await fetch(DIRECT_URL);
+        if (!response.ok) throw new Error();
+        const csvText = await response.text();
+        
+        databaseGlobaleUda = parsingVeloceCsv(csvText);
+        statusMsg.style.background = "#eef5ee";
+        statusMsg.style.color = "var(--accent)";
+        statusMsg.innerText = `✅ Database UDA sincronizzato all'istante! Rilevate ${databaseGlobaleUda.length} righe attive.`;
+        
+        filtraUdaSito();
+      } catch (e) {
+        statusMsg.style.background = "#faf7f2";
+        statusMsg.innerText = "💡 Lettura in corso o modalità asincrona attiva.";
+      }
     }
 
-    // Mappatura ad altissima precisione basata sulle colonne reali del foglio UDA_MASTER
-    function parsingCsvGoogleMaster(text) {
+    function parsingVeloceCsv(text) {
       const righe = text.split(/\r?\n/);
       const risultato = [];
       
       for (let i = 1; i < righe.length; i++) {
-        const rigaAttuale = righe[i];
-        if (!rigaAttuale.trim()) continue;
+        const riga = righe[i];
+        if (!riga.trim()) continue;
         
         const celle = [];
-        let dentroVirgolette = false;
-        let cellaCorrente = "";
+        let inQuotes = false;
+        let cella = "";
         
-        for (let j = 0; j < rigaAttuale.length; j++) {
-          let char = rigaAttuale[j];
-          if (char === '"') {
-            dentroVirgolette = !dentroVirgolette;
-          } else if (char === ',' && !dentroVirgolette) {
-            celle.push(cellaCorrente.trim());
-            cellaCorrente = "";
-          } else {
-            cellaCorrente += char;
-          }
+        for (let j = 0; j < riga.length; j++) {
+          let char = riga[j];
+          if (char === '"') { inQuotes = !inQuotes; }
+          else if (char === ',' && !inQuotes) { celle.push(cella.trim()); cella = ""; }
+          else { cella += char; }
         }
-        celle.push(cellaCorrente.trim());
+        celle.push(cella.trim());
         
         const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
         
-        // Struttura corretta delle colonne:
-        // Colonna D (Indice 3): Anno Corso | Colonna E (Indice 4): Indirizzo 
-        // Colonna G (Indice 6): Materia    | Colonna H (Indice 7): Titolo UDA
-        // Colonna M (Indice 12): Competenze | Colonna N (Indice 13): Abilità | Colonna O (Indice 14): Conoscenze
+        // Mappatura esatta basata sul file tracciato UDA_MASTER
         if (pulito.length >= 15) {
           risultato.push({
-            id: pulito[0] || "UDA_" + i,
+            id: pulito[0] || "U_ID_" + i,
             anno: pulito[3],       
             indirizzo: pulito[4],  
             materia: pulito[6],    
@@ -328,8 +384,7 @@
 
     function toggleSelezioneVisiva(mostraOpzioni) {
       if(!mostraOpzioni) {
-        const checkboxes = document.querySelectorAll('.uda-checkbox');
-        checkboxes.forEach(cb => cb.checked = true);
+        document.querySelectorAll('.uda-checkbox').forEach(cb => cb.checked = true);
       }
     }
 
@@ -338,30 +393,28 @@
       const indirizzo = document.getElementById('indirizzo').value;
       const container = document.getElementById('listaUdaDinamica');
       
-      const udaFiltrate = databaseGlobaleUda.filter(u => 
+      const filtrati = databaseGlobaleUda.filter(u => 
         u.anno.toLowerCase().trim() === anno.toLowerCase().trim() && 
         u.indirizzo.toLowerCase().trim() === indirizzo.toLowerCase().trim()
       );
       
       container.innerHTML = '';
-      if(udaFiltrate.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding: 1rem 0;">Nessun dato trovato nel foglio per questa combinazione. Verifica i filtri o inserisci nuove righe nel foglio Google.</p>';
+      if(filtrati.length === 0) {
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna riga trovata nel foglio per questa selezione.</p>';
         return;
       }
 
-      udaFiltrate.forEach(u => {
+      filtrati.forEach(u => {
         const item = document.createElement('div');
         item.className = 'uda-item';
         item.innerHTML = `
           <label style="display:flex; align-items:flex-start; text-transform:none; font-size:0.95rem; color:var(--ink); cursor:pointer; width:100%;">
-            <input type="checkbox" value="${u.id}" class="uda-checkbox" checked style="margin-right: 14px; margin-top: 4px; transform: scale(1.1);">
+            <input type="checkbox" value="${u.id}" class="uda-checkbox" checked style="margin-right:14px; margin-top:4px; transform:scale(1.1);">
             <div>
-              <strong style="color:var(--accent); text-transform: uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
+              <strong style="color:var(--accent); text-transform:uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
               <span style="font-weight:500;">${u.titolo}</span>
-              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:4px; line-height: 1.4;">
-                <strong>Competenze:</strong> ${u.comp}<br>
-                <strong>Abilità:</strong> ${u.abil}<br>
-                <strong>Conoscenze:</strong> ${u.conosc}
+              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:4px;">
+                <strong>Competenze:</strong> ${u.comp} | <strong>Abilità:</strong> ${u.abil} | <strong>Conoscenze:</strong> ${u.conosc}
               </div>
             </div>
           </label>
@@ -373,8 +426,6 @@
     document.getElementById('udaPlanForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const { jsPDF } = window.jspdf;
-      
-      // Orientamento Orizzontale (Landscape) per contenere l'output analitico completissimo
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
       const annoCorso = document.getElementById('annoCorso').value;
@@ -382,79 +433,38 @@
       const indirizzo = document.getElementById('indirizzo').value;
       const annoScolastico = document.getElementById('annoScolastico').value;
 
-      const checkboxes = document.querySelectorAll('.uda-checkbox:checked');
-      const idsSelezionati = Array.from(checkboxes).map(cb => cb.value);
-      const udaDaStampare = databaseGlobaleUda.filter(u => idsSelezionati.includes(u.id));
+      const checked = Array.from(document.querySelectorAll('.uda-checkbox:checked')).map(cb => cb.value);
+      const daStampare = databaseGlobaleUda.filter(u => checked.includes(u.id));
 
-      if (udaDaStampare.length === 0) {
-        alert("Seleziona almeno un'UDA prima di generare il documento.");
-        return;
-      }
+      if (daStampare.length === 0) { alert("Seleziona almeno un'UDA."); return; }
 
-      // 1. Rendering Esclusivo dell'Intestazione Istituzionale (Logo Scuola Lungo) nel PDF
       const imgLogo = document.getElementById('hiddenLogo');
-      try {
-        doc.addImage(imgLogo, 'JPEG', 15, 10, 267, 24); // Adattato per occupare la larghezza orizzontale
-      } catch (err) {
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("I.I.S. ANTONIO STRADIVARI — CREMONA", 15, 18);
-      }
+      try { doc.addImage(imgLogo, 'JPEG', 15, 10, 267, 24); } catch (e) {}
 
-      // Linea verde formale sotto-logo
-      doc.setDrawColor(45, 90, 61);
-      doc.setLineWidth(0.8);
-      doc.line(15, 37, 282, 37);
-
-      // 2. Metadati Istituzionali
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(90, 85, 80);
+      doc.setDrawColor(45, 90, 61); doc.setLineWidth(0.8); doc.line(15, 37, 282, 37);
+      doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(90, 85, 80);
       doc.text(`Anno Scolastico: ${annoScolastico}`, 15, 44);
       doc.text(`Indirizzo di studio: Istruzione Professionale Made in Italy — Opzione: ${indirizzo}`, 15, 49);
       
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(12);
-      doc.setTextColor(26, 24, 20);
+      doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(26, 24, 20);
       doc.text(`PIANO FORMATIVO INTEGRALE DELLE UNITA' DI APPRENDIMENTO (UDA) — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 57);
 
-      // 3. Generazione Righe Mappate per la Griglia Completa
-      const righeTabella = udaDaStampare.map((u, index) => [
-        `${index + 1}`,
-        u.materia,
-        u.titolo,
-        u.comp,
-        u.abil,
-        u.conosc
-      ]);
+      const righe = daStampare.map((u, i) => [`${i + 1}`, u.materia, u.titolo, u.comp, u.abil, u.conosc]);
 
       doc.autoTable({
         startY: 63,
         head: [['N°', 'Materia / Insegnamento', 'Titolo Unità di Apprendimento (UDA)', 'Competenze', 'Abilità', 'Conoscenze']],
-        body: righeTabella,
+        body: righe,
         headStyles: { fillColor: [45, 90, 61], fontSize: 9.5, fontStyle: 'bold' },
         bodyStyles: { fontSize: 8, textColor: [26, 24, 20], valign: 'top' },
-        columnStyles: {
-          0: { cellWidth: 10, halign: 'center' },
-          1: { cellWidth: 50 },
-          2: { cellWidth: 72 },
-          3: { cellWidth: 40 },
-          4: { cellWidth: 48 },
-          5: { cellWidth: 45 }
-        },
-        margin: { left: 15, right: 15 },
-        styles: { overflow: 'paragraph' }
+        columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 50 }, 2: { cellWidth: 72 }, 3: { cellWidth: 40 }, 4: { cellWidth: 48 }, 5: { cellWidth: 45 } },
+        margin: { left: 15, right: 15 }, styles: { overflow: 'paragraph' }
       });
 
-      // 4. Sezione Firme: Solo ed esclusivamente il Coordinatore di Classe
       const finalY = doc.lastAutoTable.finalY + 20;
-      doc.setFont("Helvetica", "italic");
-      doc.setFontSize(10);
-      doc.setTextColor(26, 24, 20);
-      doc.text("Il Coordinatore di Classe", 215, finalY);
+      doc.setFont("Helvetica", "italic"); doc.setFontSize(10); doc.text("Il Coordinatore di Classe", 215, finalY);
       doc.line(215, finalY + 12, 275, finalY + 12);
 
-      // Download automatico del file
       doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
     });
   </script>

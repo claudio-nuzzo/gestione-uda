@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stradilab — Generatore Piani UDA</title>
+  <title>Stradilab — Generatore Piani UDA Universale</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   
+  <!-- Librerie per la generazione istantanea del PDF in locale -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
@@ -32,7 +33,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
       background: var(--surface);
       padding: 3rem;
@@ -50,7 +51,7 @@
     .official-header img {
       max-width: 100%;
       height: auto;
-      max-height: 80px; 
+      max-height: 85px; 
     }
 
     h1 {
@@ -91,6 +92,16 @@
       border-radius: var(--radius);
     }
 
+    .status-message {
+      padding: 1rem;
+      background: #eef5ee;
+      border: 1px solid #cce3cc;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
     .radio-group {
       margin: 1.5rem 0;
       padding: 1rem 0;
@@ -112,7 +123,6 @@
 
     .uda-selection-area {
       margin-top: 1.5rem;
-      display: none;
     }
 
     .uda-item {
@@ -122,10 +132,8 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .uda-item input {
-      margin-top: 0.25rem;
-      margin-right: 1rem;
-      accent-color: var(--accent);
+    .uda-item:hover {
+      background: #faf9f6;
     }
 
     .btn-submit {
@@ -157,11 +165,13 @@
       <h1>Generatore Piano Annuale delle UDA</h1>
     </div>
 
+    <div id="statusMsg" class="status-message">🔄 Caricamento del database centralizzato delle UDA in corso...</div>
+
     <form id="udaPlanForm">
       <div class="grid-form">
         <div>
           <label for="annoCorso">Classe (Anno di corso)</label>
-          <select id="annoCorso" required onchange="aggiornaListaUDAPersonalizzata()">
+          <select id="annoCorso" required onchange="filtraUdaSito()">
             <option value="Prima">Classe Prima (1)</option>
             <option value="Seconda">Classe Seconda (2)</option>
             <option value="Terza">Classe Terza (3)</option>
@@ -177,7 +187,7 @@
 
         <div>
           <label for="indirizzo">Indirizzo di Studio</label>
-          <select id="indirizzo" required onchange="aggiornaListaUDAPersonalizzata()">
+          <select id="indirizzo" required onchange="filtraUdaSito()">
             <option value="Moda">Moda (Made in Italy)</option>
             <option value="Arredo">Arredo (Legno/Design)</option>
           </select>
@@ -194,19 +204,19 @@
       </div>
 
       <div class="radio-group">
-        <label>Inclusione dei Contenuti</label>
+        <label>Modalità di Selezione</label>
         <label class="radio-option">
-          <input type="radio" name="strategiaUda" value="tutte" checked onclick="toggleUdaSelection(false)" />
-          Includi tutte le UDA dell'anno di corso (Standard)
+          <input type="radio" name="strategiaUda" value="tutte" checked onclick="toggleSelezioneVisiva(false)" />
+          Seleziona Tutto in Automatico (Output Completo)
         </label>
         <label class="radio-option">
-          <input type="radio" name="strategiaUda" value="personalizza" onclick="toggleUdaSelection(true)" />
-          Personalizza la lista delle UDA da includere
+          <input type="radio" name="strategiaUda" value="personalizza" onclick="toggleSelezioneVisiva(true)" />
+          Personalizza / Deseleziona elementi singoli
         </label>
       </div>
 
       <div id="udaSelectionArea" class="uda-selection-area">
-        <label>Seleziona le UDA da inserire nel documento:</label>
+        <label>Elenco UDA disponibili per la classe e l'indirizzo selezionati:</label>
         <div id="listaUdaDinamica"></div>
       </div>
 
@@ -215,42 +225,51 @@
   </div>
 
   <script>
-    // DATABASE REALE ESTRATTO DAL TUO MASTER PER LA CLASSE PRIMA MODA E ALTRI
-    const databaseUdaMock = [
-      { id: "M1", anno: "Prima", indirizzo: "Moda", titolo: "UDA 1 – Analisi grammaticale", materia: "LINGUA E LETTERATURA ITALIANA", ore: "20" },
-      { id: "M2", anno: "Prima", indirizzo: "Moda", titolo: "UDA 2 – Narrativa (racconto e romanzo)", materia: "LINGUA E LETTERATURA ITALIANA", ore: "25" },
-      { id: "M3", anno: "Prima", indirizzo: "Moda", titolo: "UDA 3 – Il genere epico (Iliade, Odissea, Eneide)", materia: "LINGUA E LETTERATURA ITALIANA", ore: "15" },
-      { id: "M4", anno: "Prima", indirizzo: "Moda", titolo: "UDA 1 – Dalla Preistoria alla fine della Repubblica romana", materia: "STORIA", ore: "30" },
-      { id: "M5", anno: "Prima", indirizzo: "Moda", titolo: "UDA 1 – Rappresentazione geometrica ed entità fondamentali", materia: "DISEGNO PROFESSIONALE", ore: "40" },
-      { id: "M6", anno: "Prima", indirizzo: "Moda", titolo: "UDA 2 – Studio del figurino e proporzioni del corpo umano", materia: "DISEGNO PROFESSIONALE", ore: "35" },
-      { id: "M7", anno: "Prima", indirizzo: "Moda", titolo: "UDA 1 – Introduzione al modulo tessile e sicurezza nei laboratori", materia: "LABORATORI TECNICI", ore: "50" },
-      { id: "M8", anno: "Prima", indirizzo: "Moda", titolo: "UDA 1 – Welcome back! Grammatica di base e funzioni comunicative", materia: "LINGUA INGLESE", ore: "20" },
-      { id: "A1", anno: "Quarta", indirizzo: "Arredo", titolo: "UDA 1 – Storia dell'arredo: Manierismo, Barocco, arredo dal '600 a metà '800", materia: "PROGETTAZIONE E PRODUZIONE", ore: "45" },
-      { id: "A2", anno: "Quarta", indirizzo: "Arredo", titolo: "UDA 2 – Interior design di abitazione", materia: "PROGETTAZIONE E PRODUZIONE", ore: "50" },
-      { id: "A3", anno: "Quarta", indirizzo: "Arredo", titolo: "UDA 3 – Progettazione elementi d'arredo", materia: "PROGETTAZIONE E PRODUZIONE", ore: "40" }
-    ];
+    // Memoria locale dell'applicazione che conterrà TUTTE le UDA caricate dal Cloud/Database
+    let databaseGlobaleUda = [];
 
-    // Inizializza la lista al primo caricamento della pagina
-    window.onload = function() {
-      aggiornaListaUDAPersonalizzata();
+    // Al caricamento, interroghiamo l'endpoint di Cloudflare o Google Sheets
+    window.onload = async function() {
+      const statusMsg = document.getElementById('statusMsg');
+      statusMsg.style.display = 'block';
+      
+      try {
+        // Quando avrai attivo il worker, inseriremo qui l'URL reale (es: /api/get-uda)
+        // Per ora simula il recupero dei dati completi senza bloccare lo sviluppo
+        const response = await fetch('/api/get-uda-database').catch(() => null);
+        if (response && response.ok) {
+          databaseGlobaleUda = await response.json();
+          statusMsg.innerText = "✅ Database UDA sincronizzato con successo dal Cloud!";
+        } else {
+          // Fallback di sviluppo temporaneo per non mostrare lo schermo vuoto
+          databaseGlobaleUda = recuperaDatiEsempioIniziali();
+          statusMsg.innerHTML = "⚠️ Esecuzione in modalità locale. Pronto a ricevere la Function Cloudflare.";
+        }
+      } catch (e) {
+        databaseGlobaleUda = recuperaDatiEsempioIniziali();
+        statusMsg.innerText = "⚠️ Errore di rete. Caricate UDA locali predefinite.";
+      }
+      
+      filtraUdaSito();
     };
 
-    function toggleUdaSelection(show) {
-      const area = document.getElementById('udaSelectionArea');
-      area.style.display = show ? 'block' : 'none';
-      if(show) aggiornaListaUDAPersonalizzata();
+    function toggleSelezioneVisiva(mostraOpzioni) {
+      const checkboxes = document.querySelectorAll('.uda-checkbox');
+      checkboxes.forEach(cb => {
+        if(!mostraOpzioni) cb.checked = true; // Se l'utente vuole tutto completo, forza la spunta su tutte
+      });
     }
 
-    function aggiornaListaUDAPersonalizzata() {
+    function filtraUdaSito() {
       const anno = document.getElementById('annoCorso').value;
       const indirizzo = document.getElementById('indirizzo').value;
       const container = document.getElementById('listaUdaDinamica');
       
-      const udaFiltrate = databaseUdaMock.filter(u => u.anno === anno && u.indirizzo === indirizzo);
+      const udaFiltrate = databaseGlobaleUda.filter(u => u.anno === anno && u.indirizzo === indirizzo);
       
       container.innerHTML = '';
       if(udaFiltrate.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding: 1rem 0;">Nessuna UDA registrata nel database locale per questa combinazione (seleziona un altro Anno Corso o cambia Indirizzo).</p>';
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding: 1rem 0;">Nessun dato registrato sul database per questa combinazione. Configura il foglio Google master per questa classe.</p>';
         return;
       }
 
@@ -258,11 +277,14 @@
         const item = document.createElement('div');
         item.className = 'uda-item';
         item.innerHTML = `
-          <label style="display:flex; align-items:center; text-transform:none; font-size:0.95rem; color:var(--ink); letter-spacing:0; cursor:pointer;">
-            <input type="checkbox" value="${u.id}" class="uda-checkbox" checked style="margin-right: 12px;">
+          <label style="display:flex; align-items:center; text-transform:none; font-size:0.95rem; color:var(--ink); cursor:pointer; width:100%;">
+            <input type="checkbox" value="${u.id}" class="uda-checkbox" checked style="margin-right: 14px; transform: scale(1.1);">
             <div>
-              <span style="color:var(--accent); font-weight:500;">[${u.materia}]</span> — ${u.titolo} 
-              <span style="color:var(--ink-muted); font-size:0.85rem;">(${u.ore} ore)</span>
+              <strong style="color:var(--accent); text-transform: uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
+              <span style="font-weight:500;">${u.titolo}</span>
+              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:3px;">
+                C: ${u.comp || '—'} | A: ${u.abil || '—'} | C: ${u.conosc || '—'}
+              </div>
             </div>
           </label>
         `;
@@ -273,86 +295,103 @@
     document.getElementById('udaPlanForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      
+      // CONFIGURAZIONE PAESAGGIO (LANDSCAPE) PER OUTPUT COMPLETISSIMO
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
       const annoCorso = document.getElementById('annoCorso').value;
       const sezione = document.getElementById('sezione').value.toUpperCase();
       const indirizzo = document.getElementById('indirizzo').value;
       const annoScolastico = document.getElementById('annoScolastico').value;
-      const strategia = document.querySelector('input[name="strategiaUda"]:checked').value;
 
-      let udaScelte = [];
-      if (strategia === 'tutte') {
-        udaScelte = databaseUdaMock.filter(u => u.anno === annoCorso && u.indirizzo === indirizzo);
-      } else {
-        const checkboxes = document.querySelectorAll('.uda-checkbox:checked');
-        const ids = Array.from(checkboxes).map(cb => cb.value);
-        udaScelte = databaseUdaMock.filter(u => ids.includes(u.id));
-      }
+      // Recupera solo le UDA che hanno il check attivo nel pannello
+      const checkboxes = document.querySelectorAll('.uda-checkbox:checked');
+      const idsSelezionati = Array.from(checkboxes).map(cb => cb.value);
+      const udaDaStampare = databaseGlobaleUda.filter(u => idsSelezionati.includes(u.id));
 
-      if (udaScelte.length === 0) {
-        alert("Seleziona almeno un'UDA da includere nel Piano!");
+      if (udaDaStampare.length === 0) {
+        alert("Seleziona almeno un'UDA dall'elenco visivo prima di procedere alla stampa.");
         return;
       }
 
+      // 1. Rendering Intestazione Grafica Istituzionale
       const imgLogo = document.getElementById('scuolaLogo');
-      
       try {
-        doc.addImage(imgLogo, 'JPEG', 15, 15, 180, 22);
+        doc.addImage(imgLogo, 'JPEG', 15, 12, 195, 23);
       } catch (err) {
         doc.setFont("Helvetica", "bold");
-        doc.setFontSize(13);
-        doc.text("I.I.S. ANTONIO STRADIVARI — CREMONA", 15, 20);
+        doc.setFontSize(14);
+        doc.text("I.I.S. ANTONIO STRADIVARI — CREMONA", 15, 18);
       }
 
+      // Riga ornamentale verde istituzionale
       doc.setDrawColor(45, 90, 61);
       doc.setLineWidth(0.8);
-      doc.line(15, 40, 195, 40);
+      doc.line(15, 38, 282, 38);
 
+      // 2. Metadati del Documento
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(10);
       doc.setTextColor(90, 85, 80);
-      doc.text(`Anno Scolastico: ${annoScolastico}`, 15, 47);
-      doc.text(`Indirizzo di studio: Professionale Made in Italy — Opzione ${indirizzo}`, 15, 52);
+      doc.text(`Anno Scolastico: ${annoScolastico}`, 15, 45);
+      doc.text(`Indirizzo di studio: Istruzione Professionale Made in Italy — Opzione: ${indirizzo}`, 15, 50);
       
       doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
+      doc.setFontSize(13);
       doc.setTextColor(26, 24, 20);
-      doc.text(`PIANO FORMATIVO ANNUALE DELLE UDA — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 63);
+      doc.text(`PIANO FORMATIVO INTEGRALE DELLE UNITA' DI APPRENDIMENTO (UDA) — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 59);
 
-      const righeTabella = udaScelte.map((u, index) => [
+      // 3. Elaborazione Righe Tabella (Senza Ore, con competenze separate)
+      const righeTabella = udaDaStampare.map((u, index) => [
         `${index + 1}`,
         u.materia,
         u.titolo,
-        `${u.ore} ore`
+        u.comp || '—',
+        u.abil || '—',
+        u.conosc || '—'
       ]);
 
+      // Generazione griglia AutoTable con ottimizzazione spazi
       doc.autoTable({
-        startY: 70,
-        head: [['N°', 'Materia / Insegnamento', 'Titolo Unità di Apprendimento', 'Ore']],
+        startY: 65,
+        head: [['N°', 'Materia / Insegnamento', 'Titolo Unità di Apprendimento (UDA)', 'Competenze', 'Abilità', 'Conoscenze']],
         body: righeTabella,
-        headStyles: { fillColor: [45, 90, 61], fontSize: 9, fontStyle: 'bold' },
-        bodyStyles: { fontSize: 8.5, textColor: [26, 24, 20] },
+        headStyles: { fillColor: [45, 90, 61], fontSize: 9.5, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8.5, textColor: [26, 24, 20], valign: 'top' },
         columnStyles: {
           0: { cellWidth: 10, halign: 'center' },
-          1: { cellWidth: 50 },
-          2: { cellWidth: 105 },
-          3: { cellWidth: 15, halign: 'center' }
+          1: { cellWidth: 55 },
+          2: { cellWidth: 80 },
+          3: { cellWidth: 35 },
+          4: { cellWidth: 45 },
+          5: { cellWidth: 42 }
         },
-        margin: { left: 15, right: 15 }
+        margin: { left: 15, right: 15 },
+        styles: { overflow: 'paragraph' }
       });
 
-      const finalY = doc.lastAutoTable.finalY + 25;
+      // 4. Sezione Firme AUTORIZZATE: Solo ed esclusivamente il Coordinatore
+      const finalY = doc.lastAutoTable.finalY + 20;
       doc.setFont("Helvetica", "italic");
-      doc.setFontSize(9);
-      doc.text("Il Coordinatore di Classe", 25, finalY);
-      doc.text("Il Dirigente Scolastico", 135, finalY);
-      
-      doc.line(20, finalY + 10, 75, finalY + 10);
-      doc.line(130, finalY + 10, 185, finalY + 10);
+      doc.setFontSize(10);
+      doc.setTextColor(26, 24, 20);
+      doc.text("Il Coordinatore di Classe", 215, finalY);
+      doc.line(215, finalY + 12, 275, finalY + 12);
 
+      // Download immediato del file generato sul client
       doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
     });
+
+    // Sementi dati di esempio per la simulazione iniziale locale (Prima Moda)
+    function recuperaDatiEsempioIniziali() {
+      return [
+        { id: "M1", anno: "Prima", indirizzo: "Moda", materia: "LINGUA E LETTERATURA ITALIANA", titolo: "UDA 1 – Analisi grammaticale", comp: "2A", abil: "A.ITA.2.5", conosc: "C.ITA.3" },
+        { id: "M2", anno: "Prima", indirizzo: "Moda", materia: "LINGUA E LETTERATURA ITALIANA", titolo: "UDA 2 – Narrativa (racconto e romanzo)", comp: "2A", abil: "A.ITA.2.5", conosc: "C.ITA.3" },
+        { id: "M3", anno: "Prima", indirizzo: "Moda", materia: "LINGUA E LETTERATURA ITALIANA", titolo: "UDA 3 – Il genere epico (Iliade, Odissea, Eneide)", comp: "1, 2", abil: "A.ITA.1.1, A.ITA.1.2", conosc: "C.ITA.1, C.ITA.5" },
+        { id: "M4", anno: "Prima", indirizzo: "Moda", materia: "STORIA E GEOGRAFIA", titolo: "UDA 1 – Storia greca (antiche civiltà, poleis, ellenismo)", comp: "1A, 4A", abil: "A.STO.1.1, A.STO.4.1", conosc: "C.STO.1, C.STO.2" },
+        { id: "M5", anno: "Prima", indirizzo: "Moda", materia: "LINGUA INGLESE", titolo: "UDA 1 – This is me", comp: "5A", abil: "A.ING.5.3, A.ING.5.5", conosc: "C.ING.1, C.ING.2" }
+      ];
+    }
   </script>
 </body>
 </html>

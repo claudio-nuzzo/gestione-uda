@@ -278,7 +278,7 @@
         </div>
 
         <div class="uda-selection-area">
-          <label>Elenco UDA caricate in tempo reale dal foglio:</label>
+          <label>Elenco UDA caricate in tempo reale dal foglio (Master + Risposte Form):</label>
           <div id="listaUdaDinamica"></div>
         </div>
 
@@ -300,15 +300,15 @@
   <script>
     let databaseGlobaleUda = [];
     
-    // Configurazione endpoint e bypass completo dei delay del cloud Google
+    // Identificativi del Foglio Google condiviso
     const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
-    const GID = "1891931441";
+    const GID_MASTER = "1891931441";   // Foglio UDA_MASTER storico
+    const GID_RISPOSTE = "1818691873";  // Foglio dove arrivano i dati del Form
 
     window.onload = function() {
       caricaDatiIstantanei();
     };
 
-    // Navigazione nativa istantanea tra i tab
     function switchTab(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -316,36 +316,48 @@
       document.getElementById(`btn-${tabName}`).classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
       
-      // Quando il docente torna sul generatore, forziamo una ri-sincronizzazione al millisecondo
       if(tabName === 'generatore') {
         caricaDatiIstantanei();
       }
     }
 
+    // Interrogazione parallela ultra-rapida di entrambi i fogli
     async function caricaDatiIstantanei() {
       const statusMsg = document.getElementById('statusMsg');
-      // Aggiungiamo un parametro casuale nell'URL per bypassare la cache del browser e forzare l'allineamento con il form
       const cacheBuster = "&nocache=" + new Date().getTime();
-      const URL_SINCRO = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}${cacheBuster}`;
+      
+      const urlMaster = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_MASTER}${cacheBuster}`;
+      const urlRisposte = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_RISPOSTE}${cacheBuster}`;
 
       try {
-        const response = await fetch(URL_SINCRO);
-        if (!response.ok) throw new Error();
-        const csvText = await response.text();
+        // Scarica contemporaneamente i dati da entrambi gli endpoint di Google
+        const [resMaster, resRisposte] = await Promise.all([
+          fetch(urlMaster).then(r => r.text()),
+          fetch(urlRisposte).then(r => r.text())
+        ]);
+
+        const datiMaster = parsingVeloceCsv(resMaster, "master");
+        const datiRisposte = parsingVeloceCsv(resRisposte, "risposte");
+
+        // Unione in memoria dei due database senza duplicati basandosi sul titolo
+        const titoliEsistenti = new Set(datiMaster.map(u => u.titolo.toLowerCase().trim()));
+        const risposteFiltrate = datiRisposte.filter(u => !titoliniEsistenti.has(u.titolo.toLowerCase().trim()));
         
-        databaseGlobaleUda = parsingVeloceCsv(csvText);
+        databaseGlobaleUda = [...datiMaster, ...risposteFiltrate];
+
         statusMsg.style.background = "#eef5ee";
         statusMsg.style.color = "var(--accent)";
-        statusMsg.innerText = `✅ Database UDA sincronizzato all'istante! Rilevate ${databaseGlobaleUda.length} righe totali nel Master.`;
+        statusMsg.innerText = `✅ Database sincronizzato! Caricate ${datiMaster.length} UDA stabili e ${risposteFiltrate.length} nuove UDA dal modulo risposte.`;
         
         filtraUdaSito();
       } catch (e) {
         statusMsg.style.background = "#faf7f2";
-        statusMsg.innerText = "💡 Lettura in corso o aggiornamento asincrono attivo.";
+        statusMsg.innerText = "💡 Sincronizzazione in corso o modalità asincrona attiva.";
+        console.error(e);
       }
     }
 
-    function parsingVeloceCsv(text) {
+    function parsingVeloceCsv(text, sorgente) {
       const righe = text.split(/\r?\n/);
       const risultato = [];
       
@@ -367,9 +379,10 @@
         
         const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
         
-        if (pulito.length >= 15) {
+        if (sorgente === "master" && pulito.length >= 15) {
+          // Tracciato Foglio MASTER storico
           risultato.push({
-            id: pulito[0] || "U_ID_" + i,
+            id: pulito[0] || "M_ID_" + i,
             anno: pulito[3],       
             indirizzo: pulito[4],  
             materia: pulito[6],    
@@ -377,6 +390,19 @@
             comp: pulito[12] || '—',       
             abil: pulito[13] || '—',       
             conosc: pulito[14] || '—'      
+          });
+        } else if (sorgente === "risposte" && pulito.length >= 18) {
+          // Tracciato Foglio Risposte Modulo (Timestamp, Email, Anno Scolastico, Anno Corso, Indirizzo, Titolo, Descrizione...)
+          // Mappa le competenze unendo quelle dell'area professionalizzante o generale per completezza
+          risultato.push({
+            id: "R_ID_" + i,
+            anno: pulito[3],       // Anno di corso ("Prima", "Seconda"..)
+            indirizzo: pulito[4],  // Indirizzo ("Moda", "Arredo")
+            materia: pulito[12],   // Materia principale
+            titolo: pulito[5],    // Titolo dell'UDA
+            comp: pulito[17] || '—',       // Competenza generale pertinente
+            abil: pulito[18] || '—',       // Abilità pertinenti
+            conosc: pulito[19] || '—'      // Conoscenze pertinenti
           });
         }
       }
@@ -395,13 +421,14 @@
       const container = document.getElementById('listaUdaDinamica');
       
       const filtrati = databaseGlobaleUda.filter(u => 
+        u.anno && u.indirizzo &&
         u.anno.toLowerCase().trim() === anno.toLowerCase().trim() && 
         u.indirizzo.toLowerCase().trim() === indirizzo.toLowerCase().trim()
       );
       
       container.innerHTML = '';
       if(filtrati.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessun tracciato presente sul foglio per i filtri selezionati. Se hai appena aggiunto un\'UDA dal Form, verifica che Anno Corso e Indirizzo coincidano.</p>';
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessun tracciato presente sul foglio per i filtri selezionati. Se hai appena aggiunto un\'UDA dal Form, verifica che Anno Corso e Indirizzo corrispondano.</p>';
         return;
       }
 
@@ -414,8 +441,8 @@
             <div>
               <strong style="color:var(--accent); text-transform:uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
               <span style="font-weight:500;">${u.titolo}</span>
-              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:4px;">
-                <strong>Competenze:</strong> ${u.comp} | <strong>Abilità:</strong> ${u.abil} | <strong>Conoscenze:</strong> ${u.conosc}
+              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:4px; line-height: 1.4;">
+                <strong>Competenze:</strong> ${u.comp} <br><strong>Abilità:</strong> ${u.abil} <br><strong>Conoscenze:</strong> ${u.conosc}
               </div>
             </div>
           </label>

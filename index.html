@@ -90,7 +90,7 @@
         <h1>IIS ANTONIO STRADIVARI - Cruscotto Monitoraggio UDA</h1>
     </div>
 
-    <div id="statusMsg">⏳ Inizializzazione sincronizzazione immediata...</div>
+    <div id="statusMsg">⏳ Sincronizzazione in corso...</div>
 
     <div class="controls">
         <label><strong>Filtra per Anno:</strong></label>
@@ -130,38 +130,11 @@
     </table>
 
     <script>
-        // ID Centralizzato coerente con lo script Apps Script
         const SHEET_ID = '11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA';
         
         let databaseGlobaleUda = [];
 
-        // Funzione per isolare i soli codici numerici/alfabetici corti anche sul sito (Salvagente di sicurezza)
-        function isolaCodice(stringa) {
-            if (!stringa || stringa.trim() === "" || stringa === "—") return "—";
-            
-            const frammenti = stringa.split(/[\n,\r]+/);
-            const codiciPuliti = [];
-            
-            frammenti.forEach(f => {
-                const frammento = f.trim();
-                if (!frammento) return;
-                
-                // Cattura il codice iniziale (es. C1, 1.2, A.TEC.1)
-                const match = frammento.match(/^([A-Za-z0-9\.\-]+)/);
-                if (match && match[1]) {
-                    const pulito = match[1].replace(/[\-\s\.]+$/, "");
-                    if (pulito && !codiciPuliti.includes(pulito)) {
-                        codiciPuliti.push(pulito);
-                    }
-                } else if (frammento.length <= 8) {
-                    if (!codiciPuliti.includes(frammento)) codiciPuliti.push(frammento);
-                }
-            });
-            
-            return codiciPuliti.length > 0 ? codiciPuliti.join(", ") : "—";
-        }
-
-        // PARSING VELOCE E TOLLERANTE DEL CSV
+        // Parsing CSV standard, lineare e pulito
         function parsingVeloceCsv(text) {
             const righe = text.split(/\r?\n/);
             const risultato = [];
@@ -188,32 +161,27 @@
                 celle.push(cella.trim());
                 const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
                 
-                // 💡 OTTIMIZZAZIONE: Bastano le prime 8 colonne compilate per considerare valida la riga storica
-                if (pulito.length >= 8) {
-                    const originataDaForm = pulito[0].startsWith("FORM");
-                    
+                // Legge la riga basandosi sulla struttura standard del Master
+                if (pulito.length >= 15) {
                     risultato.push({
-                        id: pulito[0] || 'ID-' + i,
-                        tipoOrigine: originataDaForm ? "Form" : "Storica",
+                        id: pulito[0],
                         anno: pulito[3] || '—',       
                         indirizzo: pulito[4] || '—',  
                         materia: pulito[6] || '—',    
                         titolo: pulito[7] || '—',     
-                        comp: isolaCodice(pulito[12]),       
-                        abil: isolaCodice(pulito[13]),       
-                        conosc: isolaCodice(pulito[14])      
+                        comp: pulito[12] || '—',       
+                        abil: pulito[13] || '—',       
+                        conosc: pulito[14] || '—'      
                     });
                 }
             }
             return risultato;
         }
 
-        // CARICAMENTO FULMINEO LATO WEB
+        // Caricamento diretto tramite endpoint CSV di Google Sheets (istantaneo)
         async function caricaDatiIstantanei() {
             const statusMsg = document.getElementById('statusMsg');
             const cacheBuster = "&nocache=" + new Date().getTime();
-            
-            // Richiesta diretta GViz che scarica esclusivamente i testi delle righe pre-compilate in 200ms
             const URL_DIRETTO = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv${cacheBuster}`;
             
             try {
@@ -223,22 +191,19 @@
                 
                 databaseGlobaleUda = parsingVeloceCsv(csvText);
                 
-                const storiche = databaseGlobaleUda.filter(u => u.tipoOrigine === "Storica").length;
-                const nuoveForm = databaseGlobaleUda.filter(u => u.tipoOrigine === "Form").length;
-                
                 statusMsg.style.background = "#eef5ee";
                 statusMsg.style.color = "#2e5b9a";
-                statusMsg.innerHTML = `✅ <strong>Sincronizzazione fulminea!</strong> Caricate <u>${storiche}</u> UDA storiche e <u>${nuoveForm}</u> nuove voci dal Form risposte.`;
+                statusMsg.innerHTML = `✅ <strong>Database sincronizzato!</strong> Rilevate ${databaseGlobaleUda.length} UDA nel Master.`;
                 
                 filtraUdaSito();
             } catch (e) {
                 statusMsg.style.background = "#fff3cd";
                 statusMsg.style.color = "#856404";
-                statusMsg.innerText = "⚠️ Errore di sincronizzazione immediata. Controlla che il Foglio sia condiviso con 'Chiunque abbia il link'.";
+                statusMsg.innerText = "⚠️ Errore di sincronizzazione. Verifica la connessione o i permessi del foglio.";
             }
         }
 
-        // FILTRO E RENDERING INTERFACCIA
+        // Logica di filtraggio a schermo
         function filtraUdaSito() {
             const filtroAnno = document.getElementById('filtroAnno').value;
             const filtroIndirizzo = document.getElementById('filtroIndirizzo').value;
@@ -260,7 +225,7 @@
             });
             
             if (datiFiltrati.length === 0) {
-                corpo.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#999;">Nessuna UDA corrispondente ai filtri selezionati.</td></tr>`;
+                corpo.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#999;">Nessuna UDA trovata.</td></tr>`;
                 return;
             }
             

@@ -1,486 +1,285 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stradilab — Hub Unificato UDA</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #f7f5f0;
-      --surface: #ffffff;
-      --ink: #1a1814;
-      --ink-soft: #5a5550;
-      --ink-muted: #9a9590;
-      --accent: #2d5a3d;
-      --border: #e2ddd8;
-      --radius: 2px;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      margin: 0;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      background: var(--surface);
-      padding: 3rem;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-    }
-
-    .official-header {
-      border-bottom: 2px solid var(--accent);
-      padding-bottom: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.4rem;
-      font-weight: 400;
-      margin: 0;
-      color: var(--accent);
-      letter-spacing: -0.01em;
-    }
-
-    .subtitle {
-      font-size: 0.85rem;
-      color: var(--ink-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
-    }
-
-    .tabs-nav {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0.5rem;
-    }
-
-    .tab-btn {
-      background: none;
-      border: none;
-      font-family: inherit;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink-soft);
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .tab-btn:hover { color: var(--accent); }
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom: 2px solid var(--accent);
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .grid-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-    }
-
-    label {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink-soft);
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-
-    select, input[type="text"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #c8c3bc;
-      background: var(--surface);
-      font-family: inherit;
-      color: var(--ink);
-      box-sizing: border-box;
-      border-radius: var(--radius);
-    }
-
-    .status-message {
-      padding: 1rem;
-      background: #faf7f2;
-      border: 1px solid var(--border);
-      color: var(--ink-soft);
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .radio-group {
-      margin: 1.5rem 0;
-      padding: 1rem 0;
-      border-top: 1px dashed var(--border);
-      border-bottom: 1px dashed var(--border);
-    }
-
-    .radio-option {
-      display: inline-flex;
-      align-items: center;
-      margin-right: 2rem;
-      cursor: pointer;
-    }
-
-    .radio-option input {
-      margin-right: 0.5rem;
-      accent-color: var(--accent);
-    }
-
-    .uda-item {
-      display: flex;
-      align-items: flex-start;
-      padding: 0.85rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .uda-item:hover { background: #faf9f6; }
-
-    .btn-submit {
-      background: var(--accent);
-      color: var(--surface);
-      border: none;
-      padding: 1.2rem 2rem;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 2rem;
-      transition: background 0.2s;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      font-size: 0.95rem;
-    }
-
-    .btn-submit:hover { background: #1e3d29; }
-
-    .form-wrapper {
-      width: 100%;
-      height: 950px;
-      border: 1px solid var(--border);
-      background: #ffffff;
-    }
-
-    iframe { width: 100%; height: 100%; border: none; }
-    #hiddenLogo { display: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stradilab - Monitoraggio UDA</title>
+    <style>
+        :root {
+            --primary: #1f3864;
+            --accent: #2e5b9a;
+            --bg: #fafafa;
+            --text: #333333;
+            --border: #dddddd;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        .header {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 20pt;
+        }
+        #statusMsg {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            background-color: #eee;
+        }
+        .controls {
+            margin-bottom: 20px;
+            background: #ffffff;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        select, input {
+            padding: 8px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+            font-size: 10.5pt;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f6fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e1ecf4;
+            color: var(--accent);
+            border-radius: 3px;
+            font-size: 9pt;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-  <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Stradivari" />
-
-  <div class="container">
-    <div class="official-header">
-      <div class="subtitle">Stradilab — Strumenti Didattici Digitali</div>
-      <h1>Hub Unificato Unità di Apprendimento</h1>
+    <div class="header">
+        <h1>IIS ANTONIO STRADIVARI - Cruscotto Monitoraggio UDA</h1>
     </div>
 
-    <div class="tabs-nav">
-      <button id="btn-generatore" class="tab-btn active" onclick="switchTab('generatore')">📋 Genera Piano PDF</button>
-      <button id="btn-inserimento" class="tab-btn" onclick="switchTab('inserimento')">➕ Inserisci Nuova UDA (Form)</button>
+    <div id="statusMsg">⏳ Inizializzazione sincronizzazione immediata...</div>
+
+    <div class="controls">
+        <label><strong>Filtra per Anno:</strong></label>
+        <select id="filtroAnno" onchange="filtraUdaSito()">
+            <option value="Tutti">Tutti gli anni</option>
+            <option value="Prima">Prima</option>
+            <option value="Seconda">Seconda</option>
+            <option value="Terza">Terza</option>
+            <option value="Quarta">Quarta</option>
+            <option value="Quinta">Quinta</option>
+        </select>
+
+        <label><strong>Indirizzo:</strong></label>
+        <select id="filtroIndirizzo" onchange="filtraUdaSito()">
+            <option value="Tutti">Tutti</option>
+            <option value="Moda">Moda</option>
+            <option value="Arredo">Arredo</option>
+        </select>
+
+        <input type="text" id="cercaTesto" placeholder="Cerca materia o titolo..." onkeyup="filtraUdaSito()" style="width: 250px;">
     </div>
 
-    <div id="tab-generatore" class="tab-content active">
-      <div id="statusMsg" class="status-message">🔄 Avvio sincronizzazione protetta e ottimizzazione canali cloud...</div>
+    <table id="tabellaUda">
+        <thead>
+            <tr>
+                <th>Anno</th>
+                <th>Indirizzo</th>
+                <th>Materia</th>
+                <th>Titolo UDA</th>
+                <th>Competenze</th>
+                <th>Abilità</th>
+                <th>Conoscenze</th>
+            </tr>
+        </thead>
+        <tbody id="corpoTabella">
+            </tbody>
+    </table>
 
-      <form id="udaPlanForm">
-        <div class="grid-form">
-          <div>
-            <label for="annoCorso">Classe (Anno di corso)</label>
-            <select id="annoCorso" onchange="filtraUdaSito()">
-              <option value="Prima">Classe Prima (1)</option>
-              <option value="Seconda">Classe Seconda (2)</option>
-              <option value="Terza">Classe Terza (3)</option>
-              <option value="Quarta">Classe Quarta (4)</option>
-              <option value="Quinta">Classe Quinta (5)</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="sezione">Sezione</label>
-            <input type="text" id="sezione" placeholder="es. A, B, MODA" required style="text-transform: uppercase;" />
-          </div>
-
-          <div>
-            <label for="indirizzo">Indirizzo di Studio</label>
-            <select id="indirizzo" onchange="filtraUdaSito()">
-              <option value="Moda">Moda (Made in Italy)</option>
-              <option value="Arredo">Arredo (Legno/Design)</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="annoScolastico">Anno Scolastico</label>
-            <select id="annoScolastico" required>
-              <option value="2025/2026">2025/2026</option>
-              <option value="2026/2027">2026/2027</option>
-              <option value="2027/2028">2027/2028</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="radio-group">
-          <label>Modalità di Selezione</label>
-          <label class="radio-option">
-            <input type="radio" name="strategiaUda" value="tutte" checked onclick="toggleSelezioneVisiva(false)" />
-            Seleziona Tutto in Automatico (Piano Completo)
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="strategiaUda" value="personalizza" onclick="toggleSelezioneVisiva(true)" />
-            Personalizza elenco / Escludi elementi singoli
-          </label>
-        </div>
-
-        <div class="uda-selection-area">
-          <label>Elenco UDA caricate dal cloud:</label>
-          <div id="listaUdaDinamica"></div>
-        </div>
-
-        <button type="submit" class="btn-submit">💾 Genera e Scarica PDF Ufficiale</button>
-      </form>
-    </div>
-
-    <div id="tab-inserimento" class="tab-content">
-      <div class="form-wrapper">
-        <iframe 
-          src="https://docs.google.com/forms/d/e/1FAIpQLSdy7IdZ4TEHGboQRsGnAZtB7PjRnuW8S740kVwp-Cq-0fcsfA/viewform?embedded=true" 
-          loading="lazy">
-          Caricamento del modulo di inserimento in corso...
-        </iframe>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let databaseGlobaleUda = [];
-    
-    const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
-    const GID_MASTER = "1891931441";   
-    const GID_RISPOSTE = "1818691873";  
-
-    window.onload = function() {
-      caricaDatiIstantanei();
-    };
-
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-      document.getElementById(`btn-${tabName}`).classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      
-      if(tabName === 'generatore') {
-        caricaDatiIstantanei();
-      }
-    }
-
-    // Strategia di fetch ultra-veloce con Proxy anti-blocco CORS incorporato
-    async function fetchCsvConProxy(gid) {
-      const cacheBuster = "&nocache=" + new Date().getTime();
-      const targetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}${cacheBuster}`;
-      // Usiamo un proxy CORS ultra-rapido open-source per aggirare i colli di bottiglia del browser
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-      
-      const response = await fetch(proxyUrl);
-      if (!response.ok) throw new Error("Errore di rete sul canale " + gid);
-      return await response.text();
-    }
-
-    async function caricaDatiIstantanei() {
-      const statusMsg = document.getElementById('statusMsg');
-      
-      try {
-        // Esecuzione parallela immediata
-        const [resMaster, resRisposte] = await Promise.all([
-          fetchCsvConProxy(GID_MASTER).catch(e => { console.error("Master non raggiungibile, uso fallback"); return ""; }),
-          fetchCsvConProxy(GID_RISPOSTE).catch(e => { console.error("Risposte non raggiungibili, uso fallback"); return ""; })
-        ]);
-
-        const datiMaster = resMaster ? parsingVeloceCsv(resMaster, "master") : [];
-        const datiRisposte = resRisposte ? parsingVeloceCsv(resRisposte, "risposte") : [];
-
-        // Unione efficiente in tempo reale rimuovendo duplicati sul titolo
-        const titoliEsistenti = new Set(datiMaster.map(u => u.titolo.toLowerCase().trim()));
-        const risposteFiltrate = datiRisposte.filter(u => u.titolo && !titoliEsistenti.has(u.titolo.toLowerCase().trim()));
+    <script>
+        // ID Centralizzato coerente con lo script Apps Script
+        const SHEET_ID = '11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA';
         
-        databaseGlobaleUda = [...datiMaster, ...risposteFiltrate];
+        let databaseGlobaleUda = [];
 
-        statusMsg.style.background = "#eef5ee";
-        statusMsg.style.color = "var(--accent)";
-        statusMsg.innerText = `✅ Sincronizzazione fulminea! Caricate ${datiMaster.length} UDA storiche e ${risposteFiltrate.length} nuove voci dal Form risposte.`;
-        
-        filtraUdaSito();
-      } catch (e) {
-        statusMsg.style.background = "#fdeeed";
-        statusMsg.style.color = "#c0392b";
-        statusMsg.innerText = "⚠️ Errore di sincronizzazione. Assicurati che il Foglio sia impostato su 'Chiunque abbia il link può visualizzare'.";
-        console.error(e);
-      }
-    }
-
-    function parsingVeloceCsv(text, sorgente) {
-      const righe = text.split(/\r?\n/);
-      const risultato = [];
-      
-      for (let i = 1; i < righe.length; i++) {
-        const riga = righe[i];
-        if (!riga.trim()) continue;
-        
-        const celle = [];
-        let inQuotes = false;
-        let cella = "";
-        
-        for (let j = 0; j < riga.length; j++) {
-          let char = riga[j];
-          if (char === '"') { inQuotes = !inQuotes; }
-          else if (char === ',' && !inQuotes) { celle.push(cella.trim()); cella = ""; }
-          else { cella += char; }
+        // Funzione per isolare i soli codici numerici/alfabetici corti anche sul sito (Salvagente di sicurezza)
+        function isolaCodice(stringa) {
+            if (!stringa || stringa.trim() === "" || stringa === "—") return "—";
+            
+            const frammenti = stringa.split(/[\n,\r]+/);
+            const codiciPuliti = [];
+            
+            frammenti.forEach(f => {
+                const frammento = f.trim();
+                if (!frammento) return;
+                
+                // Cattura il codice iniziale (es. C1, 1.2, A.TEC.1)
+                const match = frammento.match(/^([A-Za-z0-9\.\-]+)/);
+                if (match && match[1]) {
+                    const pulito = match[1].replace(/[\-\s\.]+$/, "");
+                    if (pulito && !codiciPuliti.includes(pulito)) {
+                        codiciPuliti.push(pulito);
+                    }
+                } else if (frammento.length <= 8) {
+                    if (!codiciPuliti.includes(frammento)) codiciPuliti.push(frammento);
+                }
+            });
+            
+            return codiciPuliti.length > 0 ? codiciPuliti.join(", ") : "—";
         }
-        celle.push(cella.trim());
-        
-        const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
-        
-        if (sorgente === "master" && pulito.length >= 15) {
-          risultato.push({
-            id: pulito[0] || "M_ID_" + i,
-            anno: pulito[3],       
-            indirizzo: pulito[4],  
-            materia: pulito[6],    
-            titolo: pulito[7],     
-            comp: pulito[12] || '—',       
-            abil: pulito[13] || '—',       
-            conosc: pulito[14] || '—'      
-          });
-        } else if (sorgente === "risposte" && pulito.length >= 20) {
-          // Normalizzazione indici per foglio risposte da Google Form
-          risultato.push({
-            id: "R_ID_" + i,
-            anno: pulito[3],       
-            indirizzo: pulito[4],  
-            materia: pulito[12],   
-            titolo: pulito[5],    
-            comp: pulito[17] || '—',       
-            abil: pulito[18] || '—',       
-            conosc: pulito[19] || '—'      
-          });
+
+        // PARSING VELOCE E TOLLERANTE DEL CSV
+        function parsingVeloceCsv(text) {
+            const righe = text.split(/\r?\n/);
+            const risultato = [];
+            
+            for (let i = 1; i < righe.length; i++) {
+                const riga = righe[i];
+                if (!riga.trim()) continue;
+                
+                const celle = [];
+                let inQuotes = false;
+                let cella = "";
+                
+                for (let j = 0; j < riga.length; j++) {
+                    let char = riga[j];
+                    if (char === '"') { 
+                        inQuotes = !inQuotes; 
+                    } else if (char === ',' && !inQuotes) { 
+                        celle.push(cella.trim()); 
+                        cella = ""; 
+                    } else { 
+                        cella += char; 
+                    }
+                }
+                celle.push(cella.trim());
+                const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
+                
+                // 💡 OTTIMIZZAZIONE: Bastano le prime 8 colonne compilate per considerare valida la riga storica
+                if (pulito.length >= 8) {
+                    const originataDaForm = pulito[0].startsWith("FORM");
+                    
+                    risultato.push({
+                        id: pulito[0] || 'ID-' + i,
+                        tipoOrigine: originataDaForm ? "Form" : "Storica",
+                        anno: pulito[3] || '—',       
+                        indirizzo: pulito[4] || '—',  
+                        materia: pulito[6] || '—',    
+                        titolo: pulito[7] || '—',     
+                        comp: isolaCodice(pulito[12]),       
+                        abil: isolaCodice(pulito[13]),       
+                        conosc: isolaCodice(pulito[14])      
+                    });
+                }
+            }
+            return risultato;
         }
-      }
-      return risultato;
-    }
 
-    function toggleSelezioneVisiva(mostraOpzioni) {
-      if(!mostraOpzioni) {
-        document.querySelectorAll('.uda-checkbox').forEach(cb => cb.checked = true);
-      }
-    }
+        // CARICAMENTO FULMINEO LATO WEB
+        async function caricaDatiIstantanei() {
+            const statusMsg = document.getElementById('statusMsg');
+            const cacheBuster = "&nocache=" + new Date().getTime();
+            
+            // Richiesta diretta GViz che scarica esclusivamente i testi delle righe pre-compilate in 200ms
+            const URL_DIRETTO = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv${cacheBuster}`;
+            
+            try {
+                const response = await fetch(URL_DIRETTO);
+                if (!response.ok) throw new Error();
+                const csvText = await response.text();
+                
+                databaseGlobaleUda = parsingVeloceCsv(csvText);
+                
+                const storiche = databaseGlobaleUda.filter(u => u.tipoOrigine === "Storica").length;
+                const nuoveForm = databaseGlobaleUda.filter(u => u.tipoOrigine === "Form").length;
+                
+                statusMsg.style.background = "#eef5ee";
+                statusMsg.style.color = "#2e5b9a";
+                statusMsg.innerHTML = `✅ <strong>Sincronizzazione fulminea!</strong> Caricate <u>${storiche}</u> UDA storiche e <u>${nuoveForm}</u> nuove voci dal Form risposte.`;
+                
+                filtraUdaSito();
+            } catch (e) {
+                statusMsg.style.background = "#fff3cd";
+                statusMsg.style.color = "#856404";
+                statusMsg.innerText = "⚠️ Errore di sincronizzazione immediata. Controlla che il Foglio sia condiviso con 'Chiunque abbia il link'.";
+            }
+        }
 
-    function filtraUdaSito() {
-      const anno = document.getElementById('annoCorso').value;
-      const indirizzo = document.getElementById('indirizzo').value;
-      const container = document.getElementById('listaUdaDinamica');
-      
-      const filtrati = databaseGlobaleUda.filter(u => 
-        u.anno && u.indirizzo &&
-        u.anno.toLowerCase().trim() === anno.toLowerCase().trim() && 
-        u.indirizzo.toLowerCase().trim() === indirizzo.toLowerCase().trim()
-      );
-      
-      container.innerHTML = '';
-      if(filtrati.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna UDA registrata per i filtri correnti. Se ne hai appena creata una, accertati di aver selezionato la stessa classe.</p>';
-        return;
-      }
+        // FILTRO E RENDERING INTERFACCIA
+        function filtraUdaSito() {
+            const filtroAnno = document.getElementById('filtroAnno').value;
+            const filtroIndirizzo = document.getElementById('filtroIndirizzo').value;
+            const cercaTesto = document.getElementById('cercaTesto').value.toLowerCase();
+            const corpo = document.getElementById('corpoTabella');
+            
+            corpo.innerHTML = "";
+            
+            const datiFiltrati = databaseGlobaleUda.filter(uda => {
+                if (filtroAnno !== "Tutti" && uda.anno !== filtroAnno) return false;
+                if (filtroIndirizzo !== "Tutti" && uda.indirizzo !== filtroIndirizzo) return false;
+                
+                if (cercaTesto) {
+                    const inMateria = uda.materia.toLowerCase().includes(cercaTesto);
+                    const inTitolo = uda.titolo.toLowerCase().includes(cercaTesto);
+                    if (!inMateria && !inTitolo) return false;
+                }
+                return true;
+            });
+            
+            if (datiFiltrati.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#999;">Nessuna UDA corrispondente ai filtri selezionati.</td></tr>`;
+                return;
+            }
+            
+            datiFiltrati.forEach(uda => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${uda.anno}</strong></td>
+                    <td><span class="badge">${uda.indirizzo}</span></td>
+                    <td>${uda.materia}</td>
+                    <td>${uda.titolo}</td>
+                    <td><code>${uda.comp}</code></td>
+                    <td><code>${uda.abil}</code></td>
+                    <td><code>${uda.conosc}</code></td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
 
-      filtrati.forEach(u => {
-        const item = document.createElement('div');
-        item.className = 'uda-item';
-        item.innerHTML = `
-          <label style="display:flex; align-items:flex-start; text-transform:none; font-size:0.95rem; color:var(--ink); cursor:pointer; width:100%;">
-            <input type="checkbox" value="${u.id}" class="uda-checkbox" checked style="margin-right:14px; margin-top:4px; transform:scale(1.1);">
-            <div>
-              <strong style="color:var(--accent); text-transform:uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
-              <span style="font-weight:500;">${u.titolo}</span>
-              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:4px; line-height: 1.4;">
-                <strong>Competenze:</strong> ${u.comp} <br><strong>Abilità:</strong> ${u.abil} <br><strong>Conoscenze:</strong> ${u.conosc}
-              </div>
-            </div>
-          </label>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    document.getElementById('udaPlanForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-      const annoCorso = document.getElementById('annoCorso').value;
-      const sezione = document.getElementById('sezione').value.toUpperCase();
-      const indirizzo = document.getElementById('indirizzo').value;
-      const annoScolastico = document.getElementById('annoScolastico').value;
-
-      const checked = Array.from(document.querySelectorAll('.uda-checkbox:checked')).map(cb => cb.value);
-      const daStampare = databaseGlobaleUda.filter(u => checked.includes(u.id));
-
-      if (daStampare.length === 0) { alert("Seleziona almeno un'UDA."); return; }
-
-      const imgLogo = document.getElementById('hiddenLogo');
-      try { doc.addImage(imgLogo, 'JPEG', 15, 10, 267, 24); } catch (e) {}
-
-      doc.setDrawColor(45, 90, 61); doc.setLineWidth(0.8); doc.line(15, 37, 282, 37);
-      doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(90, 85, 80);
-      doc.text(`Anno Scolastico: ${annoScolastico}`, 15, 44);
-      doc.text(`Indirizzo di studio: Istruzione Professionale Made in Italy — Opzione: ${indirizzo}`, 15, 49);
-      
-      doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(26, 24, 20);
-      doc.text(`PIANO FORMATIVO INTEGRALE DELLE UNITA' DI APPRENDIMENTO (UDA) — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 57);
-
-      const righe = daStampare.map((u, i) => [`${i + 1}`, u.materia, u.titolo, u.comp, u.abil, u.conosc]);
-
-      doc.autoTable({
-        startY: 63,
-        head: [['N°', 'Materia / Insegnamento', 'Titolo Unità di Apprendimento (UDA)', 'Competenze', 'Abilità', 'Conoscenze']],
-        body: righe,
-        headStyles: { fillColor: [45, 90, 61], fontSize: 9.5, fontStyle: 'bold' },
-        bodyStyles: { fontSize: 8, textColor: [26, 24, 20], valign: 'top' },
-        columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 50 }, 2: { cellWidth: 72 }, 3: { cellWidth: 40 }, 4: { cellWidth: 48 }, 5: { cellWidth: 45 } },
-        margin: { left: 15, right: 15 }, styles: { overflow: 'paragraph' }
-      });
-
-      const finalY = doc.lastAutoTable.finalY + 20;
-      doc.setFont("Helvetica", "italic"); doc.setFontSize(10); doc.text("Il Coordinatore di Classe", 215, finalY);
-      doc.line(215, finalY + 12, 275, finalY + 12);
-
-      doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
-    });
-  </script>
+        window.onload = caricaDatiIstantanei;
+    </script>
 </body>
 </html>

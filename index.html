@@ -3,460 +3,947 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stradilab — Hub Unificato UDA</title>
+  <title>Stradilab — Documentazione Didattica</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
   <style>
+    /* ── TOKEN SYSTEM ──────────────────────────────────────── */
     :root {
-      --bg: #f7f5f0;
-      --surface: #ffffff;
-      --ink: #1a1814;
-      --ink-soft: #5a5550;
-      --ink-muted: #9a9590;
-      --accent: #2d5a3d;
-      --border: #e2ddd8;
-      --radius: 2px;
+      --cream:       #f0ece4;
+      --cream-dark:  #e6e0d6;
+      --surface:     #ffffff;
+      --ink:         #1a1714;
+      --ink-soft:    #5a5450;
+      --ink-muted:   #9a9490;
+      --crimson:     #9b2335;
+      --crimson-dark:#7a1a28;
+      --crimson-pale:#f5e8ea;
+      --border:      #ddd8d0;
+      --border-light:#ede9e2;
+      --radius:      0px;
+      --shadow:      0 2px 16px rgba(26,23,20,0.07);
     }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--bg);
+      background: var(--cream);
       color: var(--ink);
       font-family: 'DM Sans', sans-serif;
-      margin: 0;
-      padding: 2rem;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      background: var(--surface);
-      padding: 3rem;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    /* ── SIDEBAR ───────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
     }
 
-    .official-header {
-      border-bottom: 2px solid var(--accent);
-      padding-bottom: 1rem;
-      margin-bottom: 2rem;
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow-y: auto;
     }
 
-    h1 {
+    .sidebar-brand {
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-brand .eyebrow {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 0.4rem;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .sidebar-brand h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2.4rem;
-      font-weight: 400;
-      margin: 0;
-      color: var(--accent);
+      font-size: 1.7rem;
+      font-weight: 300;
+      color: #fff;
+      line-height: 1.1;
       letter-spacing: -0.01em;
     }
 
-    .subtitle {
-      font-size: 0.85rem;
-      color: var(--ink-soft);
+    .sidebar-brand h2 span {
+      color: var(--crimson);
+      font-style: italic;
+    }
+
+    .sidebar-brand .tagline {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 0.5rem;
+      font-weight: 300;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.25);
+      font-family: 'DM Mono', monospace;
+      padding: 1.5rem 1.5rem 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.875rem;
+      font-weight: 400;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+      background: none;
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      width: 100%;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .nav-item:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .nav-item.active {
+      color: #fff;
+      background: rgba(155,35,53,0.15);
+      border-left-color: var(--crimson);
+      font-weight: 500;
+    }
+
+    .nav-item .nav-icon {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-family: 'DM Mono', monospace;
+      background: rgba(155,35,53,0.3);
+      color: #e88;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.2);
+      line-height: 1.5;
+    }
+
+    /* ── MAIN CONTENT ─────────────────────────────────────── */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      margin-bottom: 0.5rem;
+      color: var(--ink-muted);
+      font-family: 'DM Mono', monospace;
     }
 
-    .tabs-nav {
+    .topbar-title strong {
+      color: var(--crimson);
+    }
+
+    .topbar-meta {
+      font-size: 0.75rem;
+      color: var(--ink-muted);
       display: flex;
+      align-items: center;
       gap: 1rem;
+    }
+
+    .topbar-meta .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4caf50;
+      display: inline-block;
+    }
+
+    /* ── PANELS ───────────────────────────────────────────── */
+    .panel {
+      display: none;
+      padding: 2.5rem;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .panel.active { display: block; }
+
+    .panel-header {
       margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 0.5rem;
-      flex-wrap: wrap;
     }
 
-    .tab-btn {
-      background: none;
-      border: none;
-      font-family: inherit;
-      font-size: 0.9rem;
+    .panel-eyebrow {
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink-soft);
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .tab-btn:hover { color: var(--accent); }
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom: 2px solid var(--accent);
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .grid-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-    }
-
-    label {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink-soft);
-      display: block;
+      letter-spacing: 0.15em;
+      color: var(--crimson);
+      font-family: 'DM Mono', monospace;
       margin-bottom: 0.5rem;
     }
 
-    select, input[type="text"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #c8c3bc;
-      background: var(--surface);
-      font-family: inherit;
+    .panel-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 400;
       color: var(--ink);
-      box-sizing: border-box;
-      border-radius: var(--radius);
+      line-height: 1.15;
     }
 
-    .status-message {
-      padding: 1rem;
-      background: #faf7f2;
+    .panel-desc {
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin-top: 0.5rem;
+      max-width: 600px;
+    }
+
+    /* ── FORM CONTROLS ────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      padding: 1.5rem;
+      background: var(--surface);
       border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 0.5rem;
+    }
+
+    .field-group select,
+    .field-group input[type="text"] {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--border);
+      background: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+    }
+
+    .field-group select:focus,
+    .field-group input:focus {
+      border-color: var(--crimson);
+      background: var(--surface);
+    }
+
+    /* ── STATUS BAR ───────────────────────────────────────── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--crimson);
+      font-size: 0.85rem;
       color: var(--ink-soft);
       margin-bottom: 1.5rem;
-      font-size: 0.9rem;
+    }
+
+    .status-bar.ok {
+      border-left-color: #4caf50;
+      background: #f6faf6;
+    }
+
+    /* ── RADIO TOGGLE ─────────────────────────────────────── */
+    .toggle-group {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      width: fit-content;
+    }
+
+    .toggle-option {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.825rem;
       font-weight: 500;
-    }
-
-    .radio-group {
-      margin: 1.5rem 0;
-      padding: 1rem 0;
-      border-top: 1px dashed var(--border);
-      border-bottom: 1px dashed var(--border);
-    }
-
-    .radio-option {
-      display: inline-flex;
-      align-items: center;
-      margin-right: 2rem;
       cursor: pointer;
+      color: var(--ink-soft);
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s;
+      user-select: none;
     }
 
-    .radio-option input {
-      margin-right: 0.5rem;
-      accent-color: var(--accent);
+    .toggle-option:last-child { border-right: none; }
+    .toggle-option input { display: none; }
+
+    .toggle-option:has(input:checked),
+    .toggle-option.sel {
+      background: var(--crimson);
+      color: #fff;
+    }
+
+    /* ── UDA LIST ─────────────────────────────────────────── */
+    .uda-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .uda-list-header {
+      padding: 0.75rem 1.25rem;
+      background: var(--cream-dark);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      font-family: 'DM Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .uda-item {
       display: flex;
       align-items: flex-start;
-      padding: 0.85rem;
-      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-light);
+      gap: 1rem;
+      transition: background 0.1s;
     }
-    .uda-item:hover { background: #faf9f6; }
 
-    .btn-submit {
-      background: var(--accent);
-      color: var(--surface);
-      border: none;
-      padding: 1.2rem 2rem;
-      font-family: inherit;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 2rem;
-      transition: background 0.2s;
-      letter-spacing: 0.05em;
+    .uda-item:last-child { border-bottom: none; }
+    .uda-item:hover { background: var(--cream); }
+
+    .uda-item input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--crimson);
+      flex-shrink: 0;
+      width: 15px; height: 15px;
+    }
+
+    .uda-materia {
+      font-size: 0.7rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--crimson);
       text-transform: uppercase;
-      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2rem;
     }
-    .btn-submit:hover { background: #1e3d29; }
 
-    .form-wrapper {
+    .uda-titolo {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 0.35rem;
+    }
+
+    .uda-detail {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    /* ── BUTTONS ──────────────────────────────────────────── */
+    .btn-primary {
+      background: var(--crimson);
+      color: #fff;
+      border: none;
+      padding: 1rem 2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       width: 100%;
-      height: 950px;
-      border: 1px solid var(--border);
-      background: #ffffff;
+      justify-content: center;
+      margin-top: 1.5rem;
     }
 
-    iframe { width: 100%; height: 100%; border: none; }
-    #hiddenLogo { display: none; }
+    .btn-primary:hover { background: var(--crimson-dark); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--crimson);
+      border: 1.5px solid var(--crimson);
+      padding: 0.85rem 1.75rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+      background: var(--crimson);
+      color: #fff;
+    }
+
+    /* ── IFRAME WRAPPER ───────────────────────────────────── */
+    .iframe-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .iframe-wrapper iframe {
+      width: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── PFI CARDS ────────────────────────────────────────── */
+    .pfi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .pfi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pfi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--crimson);
+    }
+
+    .pfi-card.student::before { background: #5b8c6b; }
+
+    .pfi-card-eyebrow {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-family: 'DM Mono', monospace;
+      color: var(--ink-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .pfi-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .pfi-card p {
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .pfi-card .privacy-note {
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      border-top: 1px solid var(--border-light);
+      padding-top: 1rem;
+      margin-top: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      line-height: 1.5;
+    }
+
+    /* ── INFO BOX ─────────────────────────────────────────── */
+    .info-box {
+      background: var(--crimson-pale);
+      border: 1px solid #e8c8cc;
+      padding: 1rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--crimson-dark);
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; min-width: unset; position: static; }
+      .main { margin-left: 0; }
+      .layout { flex-direction: column; }
+      .pfi-grid { grid-template-columns: 1fr; }
+      .panel { padding: 1.5rem; }
+    }
   </style>
 </head>
 <body>
 
-  <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Stradivari" />
+<div class="layout">
 
-  <div class="container">
-    <div class="official-header">
-      <div class="subtitle">Stradilab — Strumenti Didattici Digitali</div>
-      <h1>Hub Unificato Unità di Apprendimento & Competenze</h1>
+  <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="eyebrow">IIS A. Stradivari — Cremona</div>
+      <h2>Stradi<span>lab</span></h2>
+      <div class="tagline">Documentazione Didattica · Moda &amp; Arredo</div>
     </div>
 
-    <div class="tabs-nav">
-      <button id="btn-generatore" class="tab-btn active" onclick="switchTab('generatore')">📋 Genera Piano PDF</button>
-      <button id="btn-competenze" class="tab-btn" onclick="switchTab('competenze')">🎓 Valutazione Competenze</button>
-      <button id="btn-inserimento" class="tab-btn" onclick="switchTab('inserimento')">➕ Inserisci Nuova UDA (Form)</button>
+    <div class="sidebar-section-label">Unità di Apprendimento</div>
+
+    <button class="nav-item active" onclick="showPanel('uda-piano')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
+      </svg>
+      Piano UDA
+    </button>
+
+    <button class="nav-item" onclick="showPanel('uda-valutazione')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+      Valutazione Competenze
+    </button>
+
+    <button class="nav-item" onclick="showPanel('uda-inserisci')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 4v16m8-8H4"/>
+      </svg>
+      Inserisci Nuova UDA
+    </button>
+
+    <div class="sidebar-section-label">Progetto Formativo</div>
+
+    <button class="nav-item" onclick="showPanel('pfi')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+      </svg>
+      Progetto Formativo (PFI)
+      <span class="nav-badge">Nuovo</span>
+    </button>
+
+    <div class="sidebar-footer">
+      Stradilab · A.S. 2026–27<br>
+      Moda · Arredo
+    </div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────────────────── -->
+  <main class="main">
+
+    <div class="topbar">
+      <div class="topbar-title">
+        Stradilab — <strong id="topbar-section">Piano UDA</strong>
+      </div>
+      <div class="topbar-meta">
+        <span class="dot"></span>
+        <span id="db-count">Database in caricamento…</span>
+      </div>
     </div>
 
-    <div id="tab-generatore" class="tab-content active">
-      <div id="statusMsg" class="status-message">🔄 Caricamento del database Master...</div>
+    <!-- ── PANEL: PIANO UDA ──────────────────────────────── -->
+    <div id="panel-uda-piano" class="panel active">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Unità di Apprendimento</div>
+        <h1 class="panel-title">Piano Formativo delle UDA</h1>
+        <p class="panel-desc">Seleziona classe, sezione e indirizzo per generare il piano completo in PDF ufficiale.</p>
+      </div>
+
+      <div id="statusMsg" class="status-bar">
+        <span>⟳</span> Sincronizzazione database Master in corso…
+      </div>
 
       <form id="udaPlanForm">
-        <div class="grid-form">
-          <div>
-            <label for="annoCorso">Classe (Anno di corso)</label>
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Anno di Corso</label>
             <select id="annoCorso" onchange="filtraUdaSito()">
-              <option value="Prima">Classe Prima (1)</option>
-              <option value="Seconda">Classe Seconda (2)</option>
-              <option value="Terza">Classe Terza (3)</option>
-              <option value="Quarta">Classe Quarta (4)</option>
-              <option value="Quinta">Classe Quinta (5)</option>
+              <option value="Prima">Classe Prima</option>
+              <option value="Seconda">Classe Seconda</option>
+              <option value="Terza">Classe Terza</option>
+              <option value="Quarta">Classe Quarta</option>
+              <option value="Quinta">Classe Quinta</option>
             </select>
           </div>
-
-          <div>
-            <label for="sezione">Sezione</label>
-            <input type="text" id="sezione" placeholder="es. A, B, MODA" required style="text-transform: uppercase;" />
+          <div class="field-group">
+            <label>Sezione</label>
+            <input type="text" id="sezione" placeholder="es. A, B…" style="text-transform:uppercase" required />
           </div>
-
-          <div>
-            <label for="indirizzo">Indirizzo di Studio</label>
+          <div class="field-group">
+            <label>Indirizzo di Studio</label>
             <select id="indirizzo" onchange="filtraUdaSito()">
               <option value="Moda">Moda (Made in Italy)</option>
               <option value="Arredo">Arredo (Legno/Design)</option>
             </select>
           </div>
-
-          <div>
-            <label for="annoScolastico">Anno Scolastico</label>
-            <select id="annoScolastico" required>
+          <div class="field-group">
+            <label>Anno Scolastico</label>
+            <select id="annoScolastico">
               <option value="2025/2026">2025/2026</option>
-              <option value="2026/2027">2026/2027</option>
+              <option value="2026/2027" selected>2026/2027</option>
               <option value="2027/2028">2027/2028</option>
             </select>
           </div>
         </div>
 
-        <div class="radio-group">
-          <label>Modalità di Selezione</label>
-          <label class="radio-option">
-            <input type="radio" name="strategiaUda" value="tutte" checked onclick="toggleSelezioneVisiva(false)" />
-            Seleziona Tutto in Automatico (Piano Completo)
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="strategiaUda" value="personalizza" onclick="toggleSelezioneVisiva(true)" />
-            Personalizza elenco / Escludi elementi singoli
-          </label>
+        <div style="margin-bottom:1.5rem;">
+          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted);font-family:'DM Mono',monospace;margin-bottom:0.75rem;">Modalità di selezione</div>
+          <div class="toggle-group">
+            <label class="toggle-option sel" id="tog-tutte">
+              <input type="radio" name="strategiaUda" value="tutte" checked onchange="onToggleChange(this)" />
+              Piano completo
+            </label>
+            <label class="toggle-option" id="tog-personalizza">
+              <input type="radio" name="strategiaUda" value="personalizza" onchange="onToggleChange(this)" />
+              Selezione manuale
+            </label>
+          </div>
         </div>
 
-        <div class="uda-selection-area">
-          <label>Elenco UDA caricate in tempo reale:</label>
+        <div class="uda-list">
+          <div class="uda-list-header">
+            <span>Elenco UDA · aggiornato in tempo reale</span>
+            <span id="uda-count" style="font-variant-numeric:tabular-nums;">—</span>
+          </div>
           <div id="listaUdaDinamica"></div>
         </div>
 
-        <button type="submit" class="btn-submit">💾 Genera e Scarica PDF Ufficiale</button>
+        <button type="submit" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a1 1 0 001 1h16a1 1 0 001-1v-3"/></svg>
+          Genera e Scarica PDF Ufficiale
+        </button>
       </form>
     </div>
 
-    <div id="tab-competenze" class="tab-content">
-      <div class="form-wrapper" style="width: 100%; min-height: 750px;">
-        <iframe 
-          src="https://script.google.com/a/macros/istitutostradivari.it/s/AKfycbyEazov3pOOxz7SpTbEgPpxGxxqLozzVhHJzt4DEBtyf1-5LRTJh_1vgPIPLjckvxQ6PQ/exec" 
-          style="width: 100%; height: 100%; border: none;"
+    <!-- ── PANEL: VALUTAZIONE COMPETENZE ────────────────── -->
+    <div id="panel-uda-valutazione" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Competenze</div>
+        <h1 class="panel-title">Valutazione per Competenze</h1>
+        <p class="panel-desc">Motore istituzionale per la valutazione e documentazione delle competenze acquisite.</p>
+      </div>
+      <div class="iframe-wrapper">
+        <iframe
+          src="https://script.google.com/a/macros/istitutostradivari.it/s/AKfycbyEazov3pOOxz7SpTbEgPpxGxxqLozzVhHJzt4DEBtyf1-5LRTJh_1vgPIPLjckvxQ6PQ/exec"
+          height="950"
           loading="lazy"
           allow="clipboard-write">
-          Caricamento del motore di valutazione competenze istituzionale...
         </iframe>
       </div>
     </div>
 
-    <div id="tab-inserimento" class="tab-content">
-      <div class="form-wrapper">
-        <iframe 
-          src="https://docs.google.com/forms/d/e/1FAIpQLSdy7IdZ4TEHGboQRsGnAZtB7PjRnuW8S740kVwp-Cq-0fcsfA/viewform?embedded=true" 
+    <!-- ── PANEL: INSERISCI UDA ──────────────────────────── -->
+    <div id="panel-uda-inserisci" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Database UDA</div>
+        <h1 class="panel-title">Inserisci Nuova UDA</h1>
+        <p class="panel-desc">Aggiungi una nuova Unità di Apprendimento al database centralizzato. I dati saranno disponibili immediatamente nel Piano UDA.</p>
+      </div>
+      <div class="iframe-wrapper">
+        <iframe
+          src="https://docs.google.com/forms/d/e/1FAIpQLSdy7IdZ4TEHGboQRsGnAZtB7PjRnuW8S740kVwp-Cq-0fcsfA/viewform?embedded=true"
+          height="950"
           loading="lazy">
-          Caricamento del modulo...
         </iframe>
       </div>
     </div>
-  </div>
 
-  <script>
-    let databaseGlobaleUda = [];
-    const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
-    const GID_MASTER = "1891931441";   
+    <!-- ── PANEL: PFI ────────────────────────────────────── -->
+    <div id="panel-pfi" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Progetto Formativo Individuale · D.Lgs. 61/17 art. 5</div>
+        <h1 class="panel-title">Generazione PFI</h1>
+        <p class="panel-desc">Il Progetto Formativo Individuale viene generato automaticamente al momento della compilazione del modulo da parte dello studente e archiviato in modo sicuro.</p>
+      </div>
 
-    window.onload = function() {
-      caricaDatiIstantanei();
-    };
+      <div class="info-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+        <span>I PFI contengono dati personali riservati degli studenti. Per questo il form si apre in una finestra separata e i documenti generati sono accessibili solo tramite Google Drive con account istituzionale.</span>
+      </div>
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-      document.getElementById(`btn-${tabName}`).classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      
-      if(tabName === 'generatore') {
-        caricaDatiIstantanei();
+      <div class="pfi-grid">
+
+        <!-- Card Studenti -->
+        <div class="pfi-card student">
+          <div class="pfi-card-eyebrow">Area Studenti</div>
+          <h3>Compila il tuo Progetto Formativo</h3>
+          <p>Inserisci i tuoi dati anagrafici, il titolo di studio e le tue esperienze formative. Il documento verrà generato automaticamente e consegnato alla segreteria.</p>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLScpQiz6q9cF0THGIKp4a75CZCf2ECzg-BKVfkxSbv7pkDWw-A/viewform"
+            target="_blank"
+            rel="noopener"
+            class="btn-secondary"
+            style="background:#5b8c6b;color:#fff;border-color:#5b8c6b;display:inline-flex;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Apri il modulo PFI
+          </a>
+          <div class="privacy-note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Il modulo si apre in una nuova finestra. I tuoi dati non transitano attraverso questo portale e sono trattati in conformità al GDPR.</span>
+          </div>
+        </div>
+
+        <!-- Card Docenti -->
+        <div class="pfi-card">
+          <div class="pfi-card-eyebrow">Area Docenti</div>
+          <h3>Archivio PFI Generati</h3>
+          <p>Accedi alla cartella Drive contenente tutti i PFI generati automaticamente. L'accesso è riservato agli account <span style="font-family:'DM Mono',monospace;font-size:0.8em">@istitutostradivari.it</span>.</p>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <a
+              href="https://drive.google.com/drive/folders/1MpskKgYaWOMP-Luf4nQh30k_cyv5rn-h"
+              target="_blank"
+              rel="noopener"
+              class="btn-secondary"
+              style="display:inline-flex;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+              Cartella PFI su Drive
+            </a>
+          </div>
+          <div class="privacy-note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span>Accesso riservato. Ogni PFI è nominato secondo il formato <span style="font-family:'DM Mono',monospace;font-size:0.85em">PFI - COGNOME Nome - sez X - Indirizzo - A.S.</span></span>
+          </div>
+        </div>
+
+      </div><!-- /pfi-grid -->
+    </div><!-- /panel-pfi -->
+
+  </main>
+</div>
+
+<img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Stradivari" style="display:none" />
+
+<script>
+  // ── NAVIGAZIONE ──────────────────────────────────────────
+  const PANEL_LABELS = {
+    'uda-piano':       'Piano UDA',
+    'uda-valutazione': 'Valutazione Competenze',
+    'uda-inserisci':   'Inserisci Nuova UDA',
+    'pfi':             'Progetto Formativo (PFI)',
+  };
+
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelector(`[onclick="showPanel('${name}')"]`).classList.add('active');
+    document.getElementById('topbar-section').textContent = PANEL_LABELS[name] || name;
+    if (name === 'uda-piano') caricaDatiIstantanei();
+  }
+
+  // ── TOGGLE SELEZIONE ─────────────────────────────────────
+  function onToggleChange(radio) {
+    document.querySelectorAll('.toggle-option').forEach(l => l.classList.remove('sel'));
+    radio.closest('.toggle-option').classList.add('sel');
+    if (radio.value === 'tutte') {
+      document.querySelectorAll('.uda-checkbox').forEach(cb => cb.checked = true);
+    }
+  }
+
+  // ── DATABASE UDA ─────────────────────────────────────────
+  let databaseGlobaleUda = [];
+  const SHEET_ID  = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
+  const GID_MASTER = "1891931441";
+
+  window.onload = function() { caricaDatiIstantanei(); };
+
+  async function caricaDatiIstantanei() {
+    const statusMsg = document.getElementById('statusMsg');
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_MASTER}&nocache=${Date.now()}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error();
+      const csv = await res.text();
+      databaseGlobaleUda = parsingVeloceCsv(csv);
+      statusMsg.className = 'status-bar ok';
+      statusMsg.innerHTML = `<span>✓</span> Database sincronizzato — ${databaseGlobaleUda.length} UDA attive`;
+      document.getElementById('db-count').textContent = databaseGlobaleUda.length + ' UDA nel database';
+      filtraUdaSito();
+    } catch(e) {
+      statusMsg.innerHTML = '<span>⟳</span> Sincronizzazione in corso…';
+    }
+  }
+
+  function parsingVeloceCsv(text) {
+    const righe = text.split(/\r?\n/);
+    const risultato = [];
+    for (let i = 1; i < righe.length; i++) {
+      const riga = righe[i];
+      if (!riga.trim()) continue;
+      const celle = [];
+      let inQ = false, cella = "";
+      for (let j = 0; j < riga.length; j++) {
+        const c = riga[j];
+        if (c === '"') { inQ = !inQ; }
+        else if (c === ',' && !inQ) { celle.push(cella.trim()); cella = ""; }
+        else { cella += c; }
+      }
+      celle.push(cella.trim());
+      const p = celle.map(c => c.replace(/^"|"$/g,'').trim());
+      if (p.length >= 15) {
+        risultato.push({
+          id: p[0] || "M_" + i,
+          anno: p[3], indirizzo: p[4],
+          materia: p[6], titolo: p[7],
+          comp: p[12] || '—', abil: p[13] || '—', conosc: p[14] || '—'
+        });
       }
     }
+    return risultato;
+  }
 
-    async function caricaDatiIstantanei() {
-      const statusMsg = document.getElementById('statusMsg');
-      const cacheBuster = "&nocache=" + new Date().getTime();
-      const URL_DIRETTO = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_MASTER}${cacheBuster}`;
-
-      try {
-        const response = await fetch(URL_DIRETTO);
-        if (!response.ok) throw new Error();
-        const csvText = await response.text();
-        
-        databaseGlobaleUda = parsingVeloceCsv(csvText);
-        
-        statusMsg.style.background = "#eef5ee";
-        statusMsg.style.color = "var(--accent)";
-        statusMsg.innerText = `✅ Database sincronizzato all'istante! Rilevate ${databaseGlobaleUda.length} UDA attive nel Master centralized.`;
-        
-        filtraUdaSito();
-      } catch (e) {
-        statusMsg.style.background = "#faf7f2";
-        statusMsg.innerText = "💡 Sincronizzazione in corso...";
-      }
+  function filtraUdaSito() {
+    const anno     = document.getElementById('annoCorso').value;
+    const indir    = document.getElementById('indirizzo').value;
+    const container = document.getElementById('listaUdaDinamica');
+    const filtrati  = databaseGlobaleUda.filter(u =>
+      u.anno && u.indirizzo &&
+      u.anno.toLowerCase().trim() === anno.toLowerCase().trim() &&
+      u.indirizzo.toLowerCase().trim() === indir.toLowerCase().trim()
+    );
+    document.getElementById('uda-count').textContent = filtrati.length + ' UDA';
+    container.innerHTML = '';
+    if (!filtrati.length) {
+      container.innerHTML = '<p style="padding:1.5rem;font-size:0.875rem;color:var(--ink-muted)">Nessuna UDA censita per questa selezione.</p>';
+      return;
     }
-
-    function parsingVeloceCsv(text) {
-      const righe = text.split(/\r?\n/);
-      const risultato = [];
-      
-      for (let i = 1; i < righe.length; i++) {
-        const riga = righe[i];
-        if (!riga.trim()) continue;
-        
-        const celle = [];
-        let inQuotes = false;
-        let cella = "";
-        
-        for (let j = 0; j < riga.length; j++) {
-          let char = riga[j];
-          if (char === '"') { inQuotes = !inQuotes; }
-          else if (char === ',' && !inQuotes) { celle.push(cella.trim()); cella = ""; }
-          else { cella += char; }
-        }
-        celle.push(cella.trim());
-        
-        const pulito = celle.map(c => c.replace(/^"|"$/g, '').trim());
-        
-        if (pulito.length >= 15) {
-          risultato.push({
-            id: pulito[0] || "M_ID_" + i,
-            anno: pulito[3],       
-            indirizzo: pulito[4],  
-            materia: pulito[6],    
-            titolo: pulito[7],     
-            comp: pulito[12] || '—',       
-            abil: pulito[13] || '—',       
-            conosc: pulito[14] || '—'      
-          });
-        }
-      }
-      return risultato;
-    }
-
-    function toggleSelezioneVisiva(mostraOpzioni) {
-      if(!mostraOpzioni) {
-        document.querySelectorAll('.uda-checkbox').forEach(cb => cb.checked = true);
-      }
-    }
-
-    function filtraUdaSito() {
-      const anno = document.getElementById('annoCorso').value;
-      const indirizzo = document.getElementById('indirizzo').value;
-      const container = document.getElementById('listaUdaDinamica');
-      
-      const filtrati = databaseGlobaleUda.filter(u => 
-        u.anno && u.indirizzo &&
-        u.anno.toLowerCase().trim() === anno.toLowerCase().trim() && 
-        u.indirizzo.toLowerCase().trim() === indirizzo.toLowerCase().trim()
-      );
-      
-      container.innerHTML = '';
-      if(filtrati.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna UDA censita per questa selezione.</p>';
-        return;
-      }
-
-      filtrati.forEach(u => {
-        const item = document.createElement('div');
-        item.className = 'uda-item';
-        item.innerHTML = `
-          <label style="display:flex; align-items:flex-start; text-transform:none; font-size:0.95rem; color:var(--ink); cursor:pointer; width:100%;">
-            <input type="checkbox" value="${u.id}" class="uda-checkbox" checked style="margin-right:14px; margin-top:4px; transform:scale(1.1);">
-            <div>
-              <strong style="color:var(--accent); text-transform:uppercase; font-size:0.85rem;">[${u.materia}]</strong><br>
-              <span style="font-weight:500;">${u.titolo}</span>
-              <div style="font-size:0.8rem; color:var(--ink-soft); margin-top:4px; line-height: 1.4;">
-                <strong>Competenze:</strong> ${u.comp} <br><strong>Abilità:</strong> ${u.abil} <br><strong>Conoscenze:</strong> ${u.conosc}
-              </div>
-            </div>
-          </label>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    document.getElementById('udaPlanForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-      const annoCorso = document.getElementById('annoCorso').value;
-      const sezione = document.getElementById('sezione').value.toUpperCase();
-      const indirizzo = document.getElementById('indirizzo').value;
-      const annoScolastico = document.getElementById('annoScolastico').value;
-
-      const checked = Array.from(document.querySelectorAll('.uda-checkbox:checked')).map(cb => cb.value);
-      const daStampare = databaseGlobaleUda.filter(u => checked.includes(u.id));
-
-      if (daStampare.length === 0) { alert("Seleziona almeno un'UDA."); return; }
-
-      const imgLogo = document.getElementById('hiddenLogo');
-      try { doc.addImage(imgLogo, 'JPEG', 15, 10, 267, 24); } catch (e) {}
-
-      doc.setDrawColor(45, 90, 61); doc.setLineWidth(0.8); doc.line(15, 37, 282, 37);
-      doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(90, 85, 80);
-      doc.text(`Anno Scolastico: ${annoScolastico}`, 15, 44);
-      doc.text(`Indirizzo di studio: Istruzione Professionale Made in Italy — Opzione: ${indirizzo}`, 15, 49);
-      
-      doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(26, 24, 20);
-      doc.text(`PIANO FORMATIVO INTEGRALE DELLE UNITA' DI APPRENDIMENTO (UDA) — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 57);
-
-      const righe = daStampare.map((u, i) => [`${i + 1}`, u.materia, u.titolo, u.comp, u.abil, u.conosc]);
-
-      doc.autoTable({
-        startY: 63,
-        head: [['N°', 'Materia / Insegnamento', 'Titolo Unità di Apprendimento (UDA)', 'Competenze', 'Abilità', 'Conoscenze']],
-        body: righe,
-        headStyles: { fillColor: [45, 90, 61], fontSize: 9.5, fontStyle: 'bold' },
-        bodyStyles: { fontSize: 8, textColor: [26, 24, 20], valign: 'top' },
-        columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 50 }, 2: { cellWidth: 72 }, 3: { cellWidth: 40 }, 4: { cellWidth: 48 }, 5: { cellWidth: 45 } },
-        margin: { left: 15, right: 15 }, styles: { overflow: 'paragraph' }
-      });
-
-      const finalY = doc.lastAutoTable.finalY + 20;
-      doc.setFont("Helvetica", "italic"); doc.setFontSize(10); doc.text("Il Coordinatore di Classe", 215, finalY);
-      doc.line(215, finalY + 12, 275, finalY + 12);
-
-      doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
+    filtrati.forEach(u => {
+      const item = document.createElement('div');
+      item.className = 'uda-item';
+      item.innerHTML = `
+        <input type="checkbox" value="${u.id}" class="uda-checkbox" checked>
+        <div style="flex:1">
+          <div class="uda-materia">${u.materia}</div>
+          <div class="uda-titolo">${u.titolo}</div>
+          <div class="uda-detail">
+            <strong>Competenze:</strong> ${u.comp}<br>
+            <strong>Abilità:</strong> ${u.abil}<br>
+            <strong>Conoscenze:</strong> ${u.conosc}
+          </div>
+        </div>`;
+      container.appendChild(item);
     });
-  </script>
+  }
+
+  // ── GENERAZIONE PDF ───────────────────────────────────────
+  document.getElementById('udaPlanForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    const annoCorso     = document.getElementById('annoCorso').value;
+    const sezione       = document.getElementById('sezione').value.toUpperCase();
+    const indirizzo     = document.getElementById('indirizzo').value;
+    const annoScolastico = document.getElementById('annoScolastico').value;
+
+    const checked    = Array.from(document.querySelectorAll('.uda-checkbox:checked')).map(cb => cb.value);
+    const daStampare = databaseGlobaleUda.filter(u => checked.includes(u.id));
+    if (!daStampare.length) { alert("Seleziona almeno un'UDA."); return; }
+
+    const imgLogo = document.getElementById('hiddenLogo');
+    try { doc.addImage(imgLogo, 'JPEG', 15, 10, 267, 24); } catch(e) {}
+
+    doc.setDrawColor(155, 35, 53); doc.setLineWidth(0.8); doc.line(15, 37, 282, 37);
+    doc.setFont("Helvetica","normal"); doc.setFontSize(10); doc.setTextColor(90,84,80);
+    doc.text(`Anno Scolastico: ${annoScolastico}`, 15, 44);
+    doc.text(`Indirizzo: Istruzione Professionale — ${indirizzo}`, 15, 49);
+    doc.setFont("Helvetica","bold"); doc.setFontSize(12); doc.setTextColor(26,23,20);
+    doc.text(`PIANO DELLE UDA — CLASSE ${annoCorso.toUpperCase()} SEZ. ${sezione}`, 15, 57);
+
+    const righe = daStampare.map((u,i) => [`${i+1}`, u.materia, u.titolo, u.comp, u.abil, u.conosc]);
+    doc.autoTable({
+      startY: 63,
+      head: [['N°','Materia','Titolo UDA','Competenze','Abilità','Conoscenze']],
+      body: righe,
+      headStyles: { fillColor: [155,35,53], fontSize: 9.5, fontStyle: 'bold' },
+      bodyStyles: { fontSize: 8, textColor: [26,23,20], valign: 'top' },
+      columnStyles: { 0:{cellWidth:10}, 1:{cellWidth:50}, 2:{cellWidth:72}, 3:{cellWidth:40}, 4:{cellWidth:48}, 5:{cellWidth:45} },
+      margin: { left:15, right:15 }, styles: { overflow: 'paragraph' }
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 20;
+    doc.setFont("Helvetica","italic"); doc.setFontSize(10);
+    doc.text("Il Coordinatore di Classe", 215, finalY);
+    doc.line(215, finalY+12, 275, finalY+12);
+    doc.save(`Piano_UDA_${annoScolastico.replace('/','_')}_${annoCorso}_${sezione}.pdf`);
+  });
+</script>
 </body>
 </html>

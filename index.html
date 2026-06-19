@@ -6,7 +6,7 @@
   <title>Stradilab — Hub Unificato UDA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -69,6 +69,7 @@
       margin-bottom: 2rem;
       border-bottom: 1px solid var(--border);
       padding-bottom: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .tab-btn {
@@ -104,6 +105,24 @@
       border: 1px solid var(--border);
     }
 
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .step-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 0.5rem;
+    }
+
     label {
       font-size: 0.85rem;
       text-transform: uppercase;
@@ -123,6 +142,21 @@
       box-sizing: border-box;
       border-radius: var(--radius);
     }
+
+    .upload-area {
+      border: 2px dashed #c8c3bc;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: #faf9f6;
+    }
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: var(--accent);
+      background: #f0f5f1;
+    }
+    .upload-area .icon { font-size: 36px; margin-bottom: 10px; }
+    #inputFile { display: none; }
 
     .status-message {
       padding: 1rem;
@@ -153,16 +187,103 @@
       accent-color: var(--accent);
     }
 
+    .tabella-wrapper {
+      overflow-x: auto;
+      margin-top: 15px;
+      border: 1px solid var(--border);
+    }
+    .tabella-competenze {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12px;
+    }
+    .tabella-competenze th {
+      background: var(--accent);
+      color: var(--surface);
+      padding: 12px 10px;
+      text-align: center;
+      font-weight: 600;
+      min-width: 100px;
+    }
+    .tabella-competenze th:first-child, .tabella-competenze td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: var(--accent);
+      min-width: 220px;
+      text-align: left;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+    .tabella-competenze td:first-child {
+      background: #fcfbfa;
+      color: var(--ink);
+      font-weight: bold;
+      padding-left: 12px;
+    }
+    .tabella-competenze tr:nth-child(even) td:first-child { background: #faf9f6; }
+    .tabella-competenze td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .legenda { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 15px; }
+    .legenda-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); }
+    .legenda-box { width: 14px; height: 14px; border: 1px solid #c8c3bc; }
+
+    .alunni-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: #faf9f6;
+    }
+    .alunno-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface);
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .alunno-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .bulk-buttons { margin-bottom: 12px; display: flex; gap: 10px; }
+    .btn-mini { padding: 6px 12px; font-size: 11px; background: var(--bg); color: var(--ink); border: 1px solid var(--border); font-weight: 500; cursor: pointer; }
+    .btn-mini:hover { background: #eeeae3; }
+
+    .livello-select {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #c8c3bc;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .livello-select.Iniziale { background: #FFCCCC; color: #990000; }
+    .livello-select.Base { background: #FFF2CC; color: #996600; }
+    .livello-select.Intermedio { background: #D9EAD3; color: #274e13; }
+    .livello-select.Avanzato { background: #CFE2F3; color: #0b5394; }
+    .livello-select.NC { background: #EFEFEF; color: #666; }
+
     .uda-item {
       display: flex;
       align-items: flex-start;
       padding: 0.85rem;
       border-bottom: 1px solid var(--border);
     }
-
     .uda-item:hover { background: #faf9f6; }
 
-    .btn-submit {
+    .btn-submit, .btn-action {
       background: var(--accent);
       color: var(--surface);
       border: none;
@@ -171,14 +292,40 @@
       font-weight: 500;
       cursor: pointer;
       width: 100%;
-      margin-top: 2rem;
+      margin-top: 1rem;
       transition: background 0.2s;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       font-size: 0.95rem;
     }
+    .btn-submit:hover, .btn-action:hover { background: #1e3d29; }
 
-    .btn-submit:hover { background: #1e3d29; }
+    .spinner-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(247,245,240,0.9);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .spinner-overlay.attivo { display: flex; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-testo { font-size: 14px; color: var(--accent); font-weight: 500; letter-spacing: 0.05em; }
+
+    .risultato-box {
+      display: none;
+      padding: 1.5rem;
+      border: 1px solid #a5d6a7;
+      background: #e8f5e9;
+      color: #1b5e20;
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .risultato-box a { color: #0d47a1; font-weight: bold; text-decoration: underline; }
 
     .form-wrapper {
       width: 100%;
@@ -195,14 +342,20 @@
 
   <img id="hiddenLogo" src="logo scuola lungo.jpg" alt="Logo Stradivari" />
 
+  <div class="spinner-overlay" id="spinner">
+    <div class="spinner"></div>
+    <div class="spinner-testo" id="spinnerTesto">Elaborazione...</div>
+  </div>
+
   <div class="container">
     <div class="official-header">
       <div class="subtitle">Stradilab — Strumenti Didattici Digitali</div>
-      <h1>Hub Unificato Unità di Apprendimento</h1>
+      <h1>Hub Unificato Unità di Apprendimento & Competenze</h1>
     </div>
 
     <div class="tabs-nav">
       <button id="btn-generatore" class="tab-btn active" onclick="switchTab('generatore')">📋 Genera Piano PDF</button>
+      <button id="btn-competenze" class="tab-btn" onclick="switchTab('competenze')">🎓 Valutazione Competenze</button>
       <button id="btn-inserimento" class="tab-btn" onclick="switchTab('inserimento')">➕ Inserisci Nuova UDA (Form)</button>
     </div>
 
@@ -266,6 +419,52 @@
       </form>
     </div>
 
+    <div id="tab-competenze" class="tab-content">
+      <div class="step-card">
+        <h2>Step 1 — Carica Tabellone Scrutini (.xls)</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:16px;">Trascina o seleziona il file .xls o .xlsx esportato dal registro elettronico.</p>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('inputFile').click()"
+             ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dragDrop(event)">
+          <div class="icon">📂</div>
+          <p style="font-size: 0.95rem; color: var(--ink);"><strong>Clicca per caricare</strong> o trascina qui il file degli scrutini</p>
+        </div>
+        <input type="file" id="inputFile" accept=".xls,.xlsx" onchange="fileSelezionato(event)">
+        <div id="nomeFile" style="margin-top:12px; font-size:13px; color:var(--accent); font-weight:600;"></div>
+      </div>
+
+      <div class="step-card" id="cardAnteprima" style="display:none;">
+        <h2>Step 2 — Validazione e Rettifica Livelli delle Competenze</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:12px;">Modifica i livelli calcolati per ciascuna competenza prima dell'estrazione finale.</p>
+        <div class="legenda">
+          <div class="legenda-item"><div class="legenda-box" style="background:#FFCCCC"></div> Iniziale</div>
+          <div class="legenda-item"><div class="legenda-box" style="background:#FFF2CC"></div> Base</div>
+          <div class="legenda-item"><div class="legenda-box" style="background:#D9EAD3"></div> Intermedio</div>
+          <div class="legenda-item"><div class="legenda-box" style="background:#CFE2F3"></div> Avanzato</div>
+          <div class="legenda-item"><div class="legenda-box" style="background:#EFEFEF"></div> NC</div>
+        </div>
+        <div class="tabella-wrapper">
+          <table class="tabella-competenze" id="tabellaAnteprima"></table>
+        </div>
+      </div>
+
+      <div class="step-card" id="cardFiltroAlunni" style="display:none;">
+        <h2>Step 3 — Selezione Alunni da Esportare</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:12px;">Scegli se generare l'attestato per l'intera classe, per un sottogruppo o per un singolo studente.</p>
+        <div class="bulk-buttons">
+          <button class="btn-mini" onclick="toggleTuttiAlunni(true)">Seleziona Tutti</button>
+          <button class="btn-mini" onclick="toggleTuttiAlunni(false)">Deseleziona Tutti</button>
+        </div>
+        <div class="alunni-grid" id="listaFiltroAlunni"></div>
+      </div>
+
+      <div class="step-card" id="cardGeneraComp" style="display:none;">
+        <h2>Step 4 — Esportazione su Registro / Drive</h2>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:16px;">Salva il foglio finale personalizzato direttamente all'interno dell'archivio cloud di istituto.</p>
+        <button class="btn-action" onclick="generaFoglio()">📊 Genera Registro Competenze</button>
+        <div class="risultato-box" id="risultatoComp"></div>
+      </div>
+    </div>
+
     <div id="tab-inserimento" class="tab-content">
       <div class="form-wrapper">
         <iframe 
@@ -279,7 +478,6 @@
 
   <script>
     let databaseGlobaleUda = [];
-    
     const SHEET_ID = "11PTigCck5tH6F7KUYKzYb_ActbG670ygE91TkiANzJA";
     const GID_MASTER = "1891931441";   
 
@@ -299,10 +497,19 @@
       }
     }
 
+    // ── LOGICA UNIFICATA SPINNER ───────────────────────────────────────────
+    function mostraSpinner(t) { 
+      document.getElementById('spinnerTesto').textContent = t; 
+      document.getElementById('spinner').classList.add('attivo'); 
+    }
+    function nascondiSpinner() { 
+      document.getElementById('spinner').classList.remove('attivo'); 
+    }
+
+    // ── LOGICA TAB 1: GENERATORE PIANO UDA ──────────────────────────────────
     async function caricaDatiIstantanei() {
       const statusMsg = document.getElementById('statusMsg');
       const cacheBuster = "&nocache=" + new Date().getTime();
-      // Chiamata di sola lettura in tempo reale nativa (Leggera e senza blocchi)
       const URL_DIRETTO = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID_MASTER}${cacheBuster}`;
 
       try {
@@ -380,7 +587,7 @@
       
       container.innerHTML = '';
       if(filtrati.length === 0) {
-        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna UDA censita per questa selezione. Se l\'hai appena aggiunta, attendi 2 secondi affinché lo script di Sheets la inserisca.</p>';
+        container.innerHTML = '<p style="font-size:0.9rem; color:var(--ink-muted); padding:1rem 0;">Nessuna UDA censita per questa selezione.</p>';
         return;
       }
 
@@ -447,6 +654,109 @@
 
       doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
     });
+
+    // ── LOGICA TAB 2: MOTORE VALUTAZIONE COMPETENZE ───────────────────────────
+    var _datiTabellone = null, _tutteCompetenze = [], _preview = [];
+
+    function dragOver(e) { e.preventDefault(); document.getElementById('uploadArea').classList.add('drag-over'); }
+    function dragLeave() { document.getElementById('uploadArea').classList.remove('drag-over'); }
+    function dragDrop(e) { e.preventDefault(); dragLeave(); elaboraFile(e.dataTransfer.files[0]); }
+    function fileSelezionato(e) { elaboraFile(e.target.files[0]); }
+
+    function elaboraFile(file) {
+      if (!file) return;
+      document.getElementById('nomeFile').textContent = '📎 File pronto: ' + file.name;
+      mostraSpinner('Analisi scrutini e mappatura delle competenze...');
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64 = btoa(new Uint8Array(e.target.result).reduce(function(data, byte){ return data + String.fromCharCode(byte); }, ''));
+        google.script.run
+          .withSuccessHandler(function(res) {
+            nascondiSpinner();
+            _datiTabellone = res.datiTabellone;
+            _tutteCompetenze = res.competenze;
+            _preview = res.preview;
+            renderAnteprima();
+            renderFiltroAlunni();
+            document.getElementById('cardAnteprima').style.display = 'block';
+            document.getElementById('cardFiltroAlunni').style.display = 'block';
+            document.getElementById('cardGeneraComp').style.display = 'block';
+          })
+          .withFailureHandler(function(err) { nascondiSpinner(); alert('Errore: ' + err.message); })
+          .elaboraTabelloneEPreview(base64);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function renderAnteprima() {
+      var opzioni = ['', 'Iniziale', 'Base', 'Intermedio', 'Avanzato', 'NC', 'N.A.'];
+      var html = '<tr><th>Nominativo</th>';
+      _tutteCompetenze.forEach(function(c){ html += '<th>' + c + '</th>'; });
+      html += '</tr>';
+
+      _preview.forEach(function(alunno, iAlunno) {
+        html += '<tr><td>' + alunno.nome + '</td>';
+        _tutteCompetenze.forEach(function(comp) {
+          var livello = alunno.livelli[comp] || '';
+          html += '<td><select class="livello-select ' + livello + '" data-alunno="' + iAlunno + '" data-comp="' + comp + '" onchange="aggiornaCella(this)">';
+          opzioni.forEach(function(op) {
+            html += '<option value="' + op + '"' + (op === livello ? ' selected' : '') + '>' + (op || '—') + '</option>';
+          });
+          html += '</select></td>';
+        });
+        html += '</tr>';
+      });
+      document.getElementById('tabellaAnteprima').innerHTML = html;
+    }
+
+    function renderFiltroAlunni() {
+      var html = '';
+      _preview.forEach(function(alunno, iAlunno) {
+        html += '<label class="alunno-check">' +
+                '<input type="checkbox" class="chk-alunno" data-index="' + iAlunno + '" checked> ' +
+                alunno.nome +
+                '</label>';
+      });
+      document.getElementById('listaFiltroAlunni').innerHTML = html;
+    }
+
+    function toggleTuttiAlunni(stato) {
+      var checkboxes = document.querySelectorAll('.chk-alunno');
+      checkboxes.forEach(function(chk) { chk.checked = stato; });
+    }
+
+    function aggiornaCella(sel) {
+      var iAlunno = parseInt(sel.dataset.alunno);
+      var comp = sel.dataset.comp;
+      _preview[iAlunno].livelli[comp] = sel.value;
+      sel.className = 'livello-select ' + sel.value;
+    }
+
+    function generaFoglio() {
+      var checkedBoxes = document.querySelectorAll('.chk-alunno:checked');
+      if (checkedBoxes.length === 0) {
+        alert('Seleziona almeno un alunno da esportare!');
+        return;
+      }
+
+      var previewFiltrata = [];
+      checkedBoxes.forEach(function(chk) {
+        var idx = parseInt(chk.dataset.index);
+        previewFiltrata.push(_preview[idx]);
+      });
+
+      mostraSpinner('Creazione del registro su Google Drive...');
+      google.script.run
+        .withSuccessHandler(function(res) {
+          nascondiSpinner();
+          var el = document.getElementById('risultatoComp');
+          el.innerHTML = '✨ <strong>Registro Competenze salvato!</strong><br><br>👉 <a href="' + res.url + '" target="_blank">Apri il file: ' + res.nome + '</a><br><span style="font-size:11px; color:var(--ink-soft);">Il file generato include la formattazione condizionale e i filtri applicati.</span>';
+          el.style.display = 'block';
+        })
+        .withFailureHandler(function(err) { nascondiSpinner(); alert('Errore: ' + err.message); })
+        .generaFoglioConferma(_datiTabellone, _tutteCompetenze, previewFiltrata);
+    }
   </script>
 </body>
 </html>

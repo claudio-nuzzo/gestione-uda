@@ -655,108 +655,14 @@
       doc.save(`Piano_UDA_${annoScolastico.replace('/', '_')}_${annoCorso}_${sezione}.pdf`);
     });
 
-    // ── LOGICA TAB 2: MOTORE VALUTAZIONE COMPETENZE ───────────────────────────
-    var _datiTabellone = null, _tutteCompetenze = [], _preview = [];
-
-    function dragOver(e) { e.preventDefault(); document.getElementById('uploadArea').classList.add('drag-over'); }
-    function dragLeave() { document.getElementById('uploadArea').classList.remove('drag-over'); }
-    function dragDrop(e) { e.preventDefault(); dragLeave(); elaboraFile(e.dataTransfer.files[0]); }
-    function fileSelezionato(e) { elaboraFile(e.target.files[0]); }
-
-    function elaboraFile(file) {
-      if (!file) return;
-      document.getElementById('nomeFile').textContent = '📎 File pronto: ' + file.name;
-      mostraSpinner('Analisi scrutini e mappatura delle competenze...');
-
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var base64 = btoa(new Uint8Array(e.target.result).reduce(function(data, byte){ return data + String.fromCharCode(byte); }, ''));
-        google.script.run
-          .withSuccessHandler(function(res) {
-            nascondiSpinner();
-            _datiTabellone = res.datiTabellone;
-            _tutteCompetenze = res.competenze;
-            _preview = res.preview;
-            renderAnteprima();
-            renderFiltroAlunni();
-            document.getElementById('cardAnteprima').style.display = 'block';
-            document.getElementById('cardFiltroAlunni').style.display = 'block';
-            document.getElementById('cardGeneraComp').style.display = 'block';
-          })
-          .withFailureHandler(function(err) { nascondiSpinner(); alert('Errore: ' + err.message); })
-          .elaboraTabelloneEPreview(base64);
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function renderAnteprima() {
-      var opzioni = ['', 'Iniziale', 'Base', 'Intermedio', 'Avanzato', 'NC', 'N.A.'];
-      var html = '<tr><th>Nominativo</th>';
-      _tutteCompetenze.forEach(function(c){ html += '<th>' + c + '</th>'; });
-      html += '</tr>';
-
-      _preview.forEach(function(alunno, iAlunno) {
-        html += '<tr><td>' + alunno.nome + '</td>';
-        _tutteCompetenze.forEach(function(comp) {
-          var livello = alunno.livelli[comp] || '';
-          html += '<td><select class="livello-select ' + livello + '" data-alunno="' + iAlunno + '" data-comp="' + comp + '" onchange="aggiornaCella(this)">';
-          opzioni.forEach(function(op) {
-            html += '<option value="' + op + '"' + (op === livello ? ' selected' : '') + '>' + (op || '—') + '</option>';
-          });
-          html += '</select></td>';
-        });
-        html += '</tr>';
-      });
-      document.getElementById('tabellaAnteprima').innerHTML = html;
-    }
-
-    function renderFiltroAlunni() {
-      var html = '';
-      _preview.forEach(function(alunno, iAlunno) {
-        html += '<label class="alunno-check">' +
-                '<input type="checkbox" class="chk-alunno" data-index="' + iAlunno + '" checked> ' +
-                alunno.nome +
-                '</label>';
-      });
-      document.getElementById('listaFiltroAlunni').innerHTML = html;
-    }
-
-    function toggleTuttiAlunni(stato) {
-      var checkboxes = document.querySelectorAll('.chk-alunno');
-      checkboxes.forEach(function(chk) { chk.checked = stato; });
-    }
-
-    function aggiornaCella(sel) {
-      var iAlunno = parseInt(sel.dataset.alunno);
-      var comp = sel.dataset.comp;
-      _preview[iAlunno].livelli[comp] = sel.value;
-      sel.className = 'livello-select ' + sel.value;
-    }
-
-    function generaFoglio() {
-      var checkedBoxes = document.querySelectorAll('.chk-alunno:checked');
-      if (checkedBoxes.length === 0) {
-        alert('Seleziona almeno un alunno da esportare!');
-        return;
-      }
-
-      var previewFiltrata = [];
-      checkedBoxes.forEach(function(chk) {
-        var idx = parseInt(chk.dataset.index);
-        previewFiltrata.push(_preview[idx]);
-      });
-
-      mostraSpinner('Creazione del registro su Google Drive...');
-      google.script.run
-        .withSuccessHandler(function(res) {
-          nascondiSpinner();
-          var el = document.getElementById('risultatoComp');
-          el.innerHTML = '✨ <strong>Registro Competenze salvato!</strong><br><br>👉 <a href="' + res.url + '" target="_blank">Apri il file: ' + res.nome + '</a><br><span style="font-size:11px; color:var(--ink-soft);">Il file generato include la formattazione condizionale e i filtri applicati.</span>';
-          el.style.display = 'block';
-        })
-        .withFailureHandler(function(err) { nascondiSpinner(); alert('Errore: ' + err.message); })
-        .generaFoglioConferma(_datiTabellone, _tutteCompetenze, previewFiltrata);
-    }
-  </script>
-</body>
-</html>
+<div id="tab-competenze" class="tab-content">
+  <div class="form-wrapper" style="width: 100%; min-height: 600px;">
+    <iframe 
+      src="https://script.google.com/a/macros/istitutostradivari.it/s/AKfycbyEazov3pOOxz7SpTbEgPpxGxxqLozzVhHJzt4DEBtyf1-5LRTJh_1vgPIPLjckvxQ6PQ/execc" 
+      style="width: 100%; height: 700px; border: none;"
+      loading="lazy"
+      allow="clipboard-write">
+      Caricamento del motore di valutazione competenze istituzionale...
+    </iframe>
+  </div>
+</div>
